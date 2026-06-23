@@ -1,0 +1,17 @@
+# Internal session docs
+CLAUDE.md
+CLAUDE_HANDOFF.md
+PROJECT_STATUS.md
+
+# IT Job Reports
+IT_Job_Report_*.md
+Shavar_IT_Job_Report_*.md
+Shavar_Daily_IT_Job_Report_*.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
