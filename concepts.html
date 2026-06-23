@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PacketPath — Networking Concepts</title>
+<style>
+/* ─── TOKENS ──────────────────────────────────────── */
+:root {
+  --bg:      #080810;
+  --surface: #0e0e1c;
+  --card:    #111124;
+  --border:  #1c1c32;
+  --text:    #f0f0fc;
+  --text2:   #6a6a90;
+  --muted:   #24243c;
+  --accent:  #ff6b00;
+  --blue:    #4f8ef7;
+  --green:   #34d399;
+  --yellow:  #f5a623;
+  --red:     #f87171;
+  --purple:  #a78bfa;
+  --cyan:    #22d3ee;
+  --nav-h:   58px;
+  --font:    -apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+  --mono:    'SF Mono','Fira Code',Consolas,monospace;
+  --r:       10px;
+  --ease:    cubic-bezier(.22,.68,0,1.2);
+}
+[data-theme="light"] {
+  --bg:      #f2f2ee;
+  --surface: #ffffff;
+  --card:    #ffffff;
+  --border:  #e0e0ea;
+  --text:    #0a0a14;
+  --text2:   #52527a;
+  --muted:   #c8c8dc;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s;line-height:1.6}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+svg{display:block}
+code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);padding:1px 5px;border-radius:4px}
+[data-theme="light"] code{background:rgba(0,0,0,.06)}
+
+/* ─── NAV ─────────────────────────────────────────── */
+nav{position:fixed;inset:0 0 auto;height:var(--nav-h);z-index:200;display:flex;align-items:center;padding:0 28px;background:rgba(8,8,16,.94);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07)}
+[data-theme="light"] nav{background:rgba(242,242,238,.94);border-color:var(--border)}
+.nav-logo{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;letter-spacing:-.3px;flex-shrink:0}
+.nav-logo svg{width:22px;height:22px}
+.logo-dot{color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:2px;margin:0 auto}
+.nav-links a{padding:6px 13px;border-radius:7px;font-size:13.5px;font-weight:500;color:var(--text2);transition:color .2s,background .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--text);background:rgba(255,255,255,.06)}
+.nav-links a.active{color:var(--accent)}
+[data-theme="light"] .nav-links a:hover,[data-theme="light"] .nav-links a.active{background:rgba(0,0,0,.05)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:color .2s,background .2s}
+.btn-icon:hover{color:var(--text);background:rgba(255,255,255,.07)}
+[data-theme="light"] .btn-icon:hover{background:rgba(0,0,0,.06)}
+.hamburger{display:none;width:34px;height:34px;flex-direction:column;justify-content:center;align-items:center;gap:5px;border-radius:7px}
+.hamburger span{display:block;width:17px;height:1.5px;background:var(--text2);border-radius:2px;transition:transform .28s var(--ease),opacity .2s}
+.hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.mob-menu{position:fixed;inset:var(--nav-h) 0 0;background:var(--bg);z-index:190;padding:16px 20px;display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transform:translateY(-10px);transition:opacity .22s,transform .22s}
+.mob-menu.open{opacity:1;pointer-events:all;transform:none}
+.mob-menu a{padding:13px 14px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text2)}
+.mob-menu a:hover{color:var(--text);background:rgba(255,255,255,.06)}
+
+/* ─── PAGE ─────────────────────────────────────────── */
+.page{padding-top:var(--nav-h);min-height:100vh}
+
+/* ─── HERO ─────────────────────────────────────────── */
+.hero{padding:60px 28px 48px;max-width:1120px;margin:0 auto;border-bottom:1px solid var(--border)}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:99px;background:rgba(79,142,247,.09);border:1px solid rgba(79,142,247,.22);font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-size:clamp(30px,4vw,50px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:12px}
+.hero p{font-size:15.5px;color:var(--text2);max-width:560px;line-height:1.7;margin-bottom:32px}
+.hero-stats{display:flex;align-items:center;gap:32px;flex-wrap:wrap}
+.hero-stat{display:flex;flex-direction:column;gap:2px}
+.hero-stat-num{font-size:28px;font-weight:800;letter-spacing:-1px;color:var(--text)}
+.hero-stat-lbl{font-size:12px;color:var(--text2);font-weight:500}
+
+/* ─── CONTROLS ─────────────────────────────────────── */
+.controls{max-width:1120px;margin:0 auto;padding:28px 28px 0}
+.controls-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:320px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text2);pointer-events:none}
+.search-input{width:100%;padding:9px 12px 9px 36px;background:var(--card);border:1px solid var(--border);border-radius:9px;font-size:13.5px;color:var(--text);font-family:var(--font);transition:border-color .2s,box-shadow .2s;outline:none}
+.search-input::placeholder{color:var(--text2)}
+.search-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.12)}
+[data-theme="light"] .search-input{background:var(--surface)}
+.filter-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chip{padding:7px 14px;border-radius:99px;font-size:12.5px;font-weight:600;border:1px solid var(--border);color:var(--text2);transition:all .18s;background:transparent}
+.chip:hover{color:var(--text);border-color:var(--muted);background:rgba(255,255,255,.04)}
+.chip.active{color:var(--text);background:var(--card);border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,107,0,.15)}
+.results-count{margin-left:auto;font-size:13px;color:var(--text2)}
+
+/* ─── CONCEPT GRID ─────────────────────────────────── */
+.concepts-wrap{max-width:1120px;margin:0 auto;padding:28px 28px 80px}
+.concepts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
+
+/* ─── CONCEPT CARD ─────────────────────────────────── */
+.c-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,box-shadow .2s;display:flex;flex-direction:column}
+.c-card:hover{border-color:rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+[data-theme="light"] .c-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.c-card.hidden{display:none}
+
+/* Card header stripe */
+.c-stripe{height:3px;width:100%}
+
+/* Card body */
+.c-body{padding:20px 20px 0;flex:1}
+.c-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px}
+.c-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.c-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.c-cat{padding:3px 9px;border-radius:5px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.c-diff{padding:3px 9px;border-radius:5px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+/* diff colors */
+.diff-beg{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.2)}
+.diff-int{background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.2)}
+.diff-adv{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+/* category colors */
+.cat-fund{background:rgba(79,142,247,.1);color:var(--blue);border:1px solid rgba(79,142,247,.2)}
+.cat-addr{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2)}
+.cat-sw{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+.cat-rt{background:rgba(255,107,0,.1);color:var(--accent);border:1px solid rgba(255,107,0,.2)}
+.cat-sec{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+.cat-proto{background:rgba(34,211,238,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.2)}
+
+.c-title{font-size:17px;font-weight:700;letter-spacing:-.3px;margin-bottom:8px;line-height:1.2}
+.c-desc{font-size:13.5px;color:var(--text2);line-height:1.65;margin-bottom:16px}
+
+/* Expand toggle */
+.c-footer{padding:0 20px 16px;margin-top:auto}
+.c-expand-btn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--text2);transition:all .18s}
+.c-expand-btn:hover{color:var(--text);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+.c-expand-btn.open{color:var(--text);background:rgba(79,142,247,.06);border-color:rgba(79,142,247,.2)}
+.c-chevron{transition:transform .25s var(--ease)}
+.c-expand-btn.open .c-chevron{transform:rotate(180deg)}
+
+/* Expanded content */
+.c-expanded{display:none;padding:0 20px 20px;border-top:1px solid var(--border);margin-top:0}
+.c-expanded.open{display:block}
+.c-exp-section{margin-top:18px}
+.c-exp-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);margin-bottom:10px}
+.c-exp-body{font-size:13.5px;color:var(--text2);line-height:1.75}
+.c-exp-body p+p{margin-top:10px}
+.c-exp-body strong{color:var(--text);font-weight:600}
+.c-exp-body code{font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px}
+[data-theme="light"] .c-exp-body code{background:rgba(0,0,0,.06)}
+
+/* Key terms */
+.key-terms{display:flex;flex-direction:column;gap:7px}
+.key-term{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:8px}
+.kt-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.kt-term{font-size:12.5px;font-weight:700;color:var(--text);min-width:120px;flex-shrink:0}
+.kt-def{font-size:12.5px;color:var(--text2);line-height:1.5}
+
+/* OSI layer table */
+.osi-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px}
+.osi-table th{padding:7px 10px;text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border)}
+.osi-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top}
+.osi-table tr:last-child td{border-bottom:none}
+.osi-table tr:hover td{background:rgba(255,255,255,.02)}
+.osi-layer-num{font-weight:800;font-size:13px}
+.osi-layer-name{font-weight:600;color:var(--text)}
+.osi-layer-fn{color:var(--text2)}
+.osi-layer-ex{font-family:var(--mono);font-size:11.5px;color:var(--text2)}
+
+/* Subnet table */
+.subnet-table{width:100%;border-collapse:collapse;font-size:12px}
+.subnet-table th{padding:6px 10px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border)}
+.subnet-table td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.04);font-family:var(--mono);font-size:12px;color:var(--text2)}
+.subnet-table td:first-child{color:var(--text);font-weight:600}
+.subnet-table tr:last-child td{border-bottom:none}
+
+/* Related labs */
+.related-labs{display:flex;flex-wrap:wrap;gap:7px}
+.rel-lab-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.18);font-size:12px;font-weight:600;color:var(--accent);transition:all .18s}
+.rel-lab-btn:hover{background:rgba(255,107,0,.14);border-color:rgba(255,107,0,.32)}
+.rel-lab-btn svg{width:11px;height:11px;flex-shrink:0}
+
+/* No results */
+.no-results{display:none;flex-direction:column;align-items:center;justify-content:center;padding:80px 28px;text-align:center;gap:16px;grid-column:1/-1}
+.no-results.show{display:flex}
+.no-results-icon{width:56px;height:56px;border-radius:14px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.no-results h3{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.no-results p{font-size:14px;color:var(--text2);max-width:320px}
+
+/* ─── FOOTER ────────────────────────────────────────── */
+footer{border-top:1px solid var(--border);padding:36px 28px}
+.footer-inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;letter-spacing:-.3px}
+.footer-links{display:flex;align-items:center;gap:20px;font-size:13px;color:var(--text2)}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12px;color:var(--text2)}
+
+/* ─── RESPONSIVE ────────────────────────────────────── */
+@media(max-width:768px){
+  .nav-links,.nav-right .btn-icon:not(:last-child),.nav-right .btn-icon:not(.theme-btn){display:none}
+  .hamburger{display:flex}
+  .hero{padding:40px 20px 36px}
+  .controls{padding:20px 20px 0}
+  .concepts-wrap{padding:20px 20px 60px}
+  .concepts-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .hero-stats{gap:20px}
+  .controls-row{flex-direction:column;align-items:stretch}
+  .search-wrap{max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="packetpath.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="8" height="8" rx="2"/><rect x="14" y="2" width="8" height="8" rx="2"/>
+      <rect x="2" y="14" width="8" height="8" rx="2"/><rect x="14" y="14" width="8" height="8" rx="2"/>
+    </svg>
+    Packet<span class="logo-dot">Path</span>
+  </a>
+  <div class="nav-links">
+    <a href="labs.html">Labs</a>
+    <a href="concepts.html" class="active">Concepts</a>
+    <a href="resources.html">Resources</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-icon theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+      <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+    <button class="hamburger" id="hamburger" onclick="toggleMob()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <a href="packetpath.html">Home</a>
+  <a href="labs.html">Labs</a>
+  <a href="concepts.html">Concepts</a>
+  <a href="resources.html">Resources</a>
+</div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Reference Library
+    </div>
+    <h1>Networking Concepts</h1>
+    <p>Solid theory before hands-on labs. Each concept is written from first principles so you know not just <em>what</em> to type — but <em>why</em> it works.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-num">15</span><span class="hero-stat-lbl">Concepts covered</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">6</span><span class="hero-stat-lbl">Topic categories</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">10</span><span class="hero-stat-lbl">Linked labs</span></div>
+    </div>
+  </section>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="controls-row">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-input" id="searchInput" type="text" placeholder="Search concepts…" oninput="filterCards()" autocomplete="off">
+      </div>
+      <div class="filter-chips" id="filterChips">
+        <button class="chip active" data-cat="all" onclick="setFilter('all',this)">All</button>
+        <button class="chip" data-cat="fundamentals" onclick="setFilter('fundamentals',this)">Fundamentals</button>
+        <button class="chip" data-cat="addressing" onclick="setFilter('addressing',this)">Addressing</button>
+        <button class="chip" data-cat="switching" onclick="setFilter('switching',this)">Switching</button>
+        <button class="chip" data-cat="routing" onclick="setFilter('routing',this)">Routing</button>
+        <button class="chip" data-cat="security" onclick="setFilter('security',this)">Security</button>
+        <button class="chip" data-cat="protocols" onclick="setFilter('protocols',this)">Protocols</button>
+      </div>
+      <span class="results-count" id="resultsCount"></span>
+    </div>
+  </div>
+
+  <!-- CONCEPTS GRID -->
+  <div class="concepts-wrap">
+    <div class="concepts-grid" id="conceptsGrid">
+
+      <!-- ─── CARD: OSI MODEL ─────────────────────────── -->
+      <article class="c-card" data-cat="fundamentals" data-title="osi model layers">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#4f8ef7,#a78bfa)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(79,142,247,.1);color:var(--blue)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="4" rx="1"/><rect x="2" y="10" width="20" height="4" rx="1"/><rect x="2" y="17" width="20" height="4" rx="1"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-fund">Fundamentals</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">OSI Model</div>
+          <div class="c-desc">The 7-layer framework that standardises how network devices communicate. Every protocol you'll ever use maps to one or more of these layers.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p>The <strong>Open Systems Interconnection (OSI) model</strong> was published by the International Organization for Standardization (ISO) in 1984. It breaks network communication into <strong>seven distinct layers</strong>, each responsible for a specific job. This separation means engineers can troubleshoot, design, or upgrade one layer without touching the others.</p>
+              <p>Think of it like mailing a letter. The postal system doesn't care what language the letter is written in (upper layers) — it only cares about the address and envelope (lower layers). Each layer adds its own "envelope" (called a <strong>header</strong>) as data travels down, and strips it off on the way back up at the receiving end. This process is called <strong>encapsulation</strong> and <strong>de-encapsulation</strong>.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">The 7 Layers</div>
+            <table class="osi-table">
+              <thead><tr><th>#</th><th>Name</th><th>Function</th><th>Examples</th></tr></thead>
+              <tbody>
+                <tr><td class="osi-layer-num" style="color:var(--red)">7</td><td class="osi-layer-name">Application</td><td class="osi-layer-fn">End-user services</td><td class="osi-layer-ex">HTTP, DNS, SMTP</td></tr>
+                <tr><td class="osi-layer-num" style="color:var(--yellow)">6</td><td class="osi-layer-name">Presentation</td><td class="osi-layer-fn">Data format, encryption</td><td class="osi-layer-ex">SSL/TLS, JPEG, ASCII</td></tr>
+                <tr><td class="osi-layer-num" style="color:var(--yellow)">5</td><td class="osi-layer-name">Session</td><td class="osi-layer-fn">Session management</td><td class="osi-layer-ex">NetBIOS, RPC</td></tr>
+                <tr><td class="osi-layer-num" style="color:var(--green)">4</td><td class="osi-layer-name">Transport</td><td class="osi-layer-fn">End-to-end delivery, ports</td><td class="osi-layer-ex">TCP, UDP</td></tr>
+                <tr><td class="osi-layer-num" style="color:var(--blue)">3</td><td class="osi-layer-name">Network</td><td class="osi-layer-fn">Logical addressing, routing</td><td class="osi-layer-ex">IP, ICMP, OSPF</td></tr>
+                <tr><td class="osi-layer-num" style="color:var(--purple)">2</td><td class="osi-layer-name">Data Link</td><td class="osi-layer-fn">MAC addressing, frames</td><td class="osi-layer-ex">Ethernet, 802.1Q, STP</td></tr>
+                <tr><td class="osi-layer-num" style="color:var(--text2)">1</td><td class="osi-layer-name">Physical</td><td class="osi-layer-fn">Bits on the wire</td><td class="osi-layer-ex">Cat6, Fibre, Wi-Fi</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">PDU</span><span class="kt-def">Protocol Data Unit — the name for the data chunk at each layer (bit, frame, packet, segment)</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">Encapsulation</span><span class="kt-def">Each layer adds its own header as data travels from application down to physical</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">L2 / L3</span><span class="kt-def">Shorthand engineers use — "L2 switch" means it operates at Layer 2 (Data Link)</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 01: IP Subnetting
+              </a>
+              <a class="rel-lab-btn" href="lab.html?id=2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 02: VLANs
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: TCP/IP MODEL ─────────────────────── -->
+      <article class="c-card" data-cat="fundamentals" data-title="tcp ip model internet protocol suite">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#34d399,#4f8ef7)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(52,211,153,.1);color:var(--green)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-fund">Fundamentals</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">TCP/IP Model</div>
+          <div class="c-desc">The practical 4-layer model that powers the real internet. While OSI is the teaching framework, TCP/IP is what your computer actually uses every day.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p>The <strong>TCP/IP model</strong> (also called the Internet model) was developed by DARPA in the 1970s before the OSI model existed. It has <strong>4 layers</strong> and is the actual framework implemented in every operating system and router in production today. OSI is the reference model; TCP/IP is the implementation.</p>
+              <p>The TCP/IP model collapses the OSI Application, Presentation, and Session layers into a single <strong>Application layer</strong>. The bottom Physical and Data Link layers are combined into one <strong>Network Access layer</strong>. The middle two — <strong>Internet</strong> (IP addressing/routing) and <strong>Transport</strong> (TCP/UDP) — map directly to their OSI counterparts.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Layer Comparison: TCP/IP vs OSI</div>
+            <table class="osi-table">
+              <thead><tr><th>TCP/IP Layer</th><th>OSI Equivalent</th><th>Key Protocols</th></tr></thead>
+              <tbody>
+                <tr><td style="color:var(--text);font-weight:600">Application</td><td style="color:var(--text2)">L7 + L6 + L5</td><td class="osi-layer-ex">HTTP, DNS, FTP, SMTP</td></tr>
+                <tr><td style="color:var(--text);font-weight:600">Transport</td><td style="color:var(--text2)">L4</td><td class="osi-layer-ex">TCP, UDP</td></tr>
+                <tr><td style="color:var(--text);font-weight:600">Internet</td><td style="color:var(--text2)">L3</td><td class="osi-layer-ex">IPv4, IPv6, ICMP, OSPF</td></tr>
+                <tr><td style="color:var(--text);font-weight:600">Network Access</td><td style="color:var(--text2)">L2 + L1</td><td class="osi-layer-ex">Ethernet, Wi-Fi, ARP</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--green)"></div><span class="kt-term">TCP</span><span class="kt-def">Transmission Control Protocol — reliable, ordered delivery with acknowledgements and retransmission</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--green)"></div><span class="kt-term">UDP</span><span class="kt-def">User Datagram Protocol — fast but unreliable, no retransmission (used for DNS, video streams)</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--green)"></div><span class="kt-term">Socket</span><span class="kt-def">A combination of IP address + port number (e.g. 192.168.1.1:443) — uniquely identifies a connection</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 01: IP Subnetting
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: IP ADDRESSING ────────────────────── -->
+      <article class="c-card" data-cat="addressing" data-title="ip addressing ipv4 classes binary">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#34d399,#22d3ee)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(52,211,153,.1);color:var(--green)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-addr">Addressing</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">IP Addressing</div>
+          <div class="c-desc">IPv4 gives every device on a network a unique 32-bit address. Understanding how to read, write, and categorise IP addresses is the bedrock skill of networking.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p>An <strong>IPv4 address</strong> is a 32-bit number written as four <strong>octets</strong> (groups of 8 bits) separated by dots — for example <code>192.168.1.100</code>. Each octet ranges from 0 to 255. The address has two parts: the <strong>network portion</strong> (identifies which network) and the <strong>host portion</strong> (identifies which device on that network). The subnet mask tells you where the split is.</p>
+              <p>There are also <strong>special address ranges</strong> you'll encounter constantly: <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, and <code>192.168.0.0/16</code> are all <strong>private addresses</strong> (RFC 1918) — they are not routed on the public internet. <code>127.0.0.1</code> is the loopback address (your own machine). <code>169.254.x.x</code> is APIPA — a sign that a device couldn't reach a DHCP server.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">IPv4 Address Classes</div>
+            <table class="subnet-table">
+              <thead><tr><th>Class</th><th>First Octet</th><th>Default Mask</th><th>Use</th></tr></thead>
+              <tbody>
+                <tr><td>A</td><td>1 – 126</td><td>255.0.0.0</td><td style="font-family:var(--font);color:var(--text2)">Large networks (ISPs)</td></tr>
+                <tr><td>B</td><td>128 – 191</td><td>255.255.0.0</td><td style="font-family:var(--font);color:var(--text2)">Medium networks (enterprises)</td></tr>
+                <tr><td>C</td><td>192 – 223</td><td>255.255.255.0</td><td style="font-family:var(--font);color:var(--text2)">Small networks (home/office)</td></tr>
+                <tr><td>D</td><td>224 – 239</td><td>N/A</td><td style="font-family:var(--font);color:var(--text2)">Multicast</td></tr>
+                <tr><td>E</td><td>240 – 255</td><td>N/A</td><td style="font-family:var(--font);color:var(--text2)">Reserved/experimental</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--green)"></div><span class="kt-term">Octet</span><span class="kt-def">One of the four 8-bit groups in an IPv4 address — each value is 0–255</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--green)"></div><span class="kt-term">Private IP</span><span class="kt-def">Address ranges reserved for internal use — never routed on the public internet (RFC 1918)</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--green)"></div><span class="kt-term">Loopback</span><span class="kt-def">127.0.0.1 — always refers to the local device. Used to test a machine's own TCP/IP stack</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 01: IP Subnetting
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: SUBNETTING & CIDR ───────────────── -->
+      <article class="c-card" data-cat="addressing" data-title="subnetting cidr subnet mask slash notation">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#22d3ee,#34d399)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(34,211,238,.1);color:var(--cyan)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-addr">Addressing</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">Subnetting &amp; CIDR</div>
+          <div class="c-desc">How to divide a large IP block into smaller networks. CIDR slash notation (<code>/24</code>, <code>/28</code>…) replaced old classful addressing and gave the internet room to scale.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>Subnetting</strong> means taking one large IP network and splitting it into multiple smaller ones. This gives you isolation between departments, smaller broadcast domains, and more efficient use of IP space. For example, <code>192.168.1.0/24</code> gives you 254 usable host addresses. Split it into two <code>/25</code> subnets and you get two groups of 126 hosts that cannot talk to each other without a router.</p>
+              <p><strong>CIDR (Classless Inter-Domain Routing)</strong> introduced the slash notation in 1993. The number after the slash — called the <strong>prefix length</strong> — tells you how many of the 32 bits are fixed (network) and how many are variable (host). A <code>/24</code> means 24 network bits, leaving 8 host bits — so 2<sup>8</sup> = 256 addresses, minus 2 reserved = <strong>254 usable hosts</strong>. The first address is the <strong>network address</strong> and the last is the <strong>broadcast address</strong>.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Common Subnet Reference</div>
+            <table class="subnet-table">
+              <thead><tr><th>CIDR</th><th>Subnet Mask</th><th>Hosts</th><th>Subnets from /24</th></tr></thead>
+              <tbody>
+                <tr><td>/24</td><td>255.255.255.0</td><td>254</td><td>1</td></tr>
+                <tr><td>/25</td><td>255.255.255.128</td><td>126</td><td>2</td></tr>
+                <tr><td>/26</td><td>255.255.255.192</td><td>62</td><td>4</td></tr>
+                <tr><td>/27</td><td>255.255.255.224</td><td>30</td><td>8</td></tr>
+                <tr><td>/28</td><td>255.255.255.240</td><td>14</td><td>16</td></tr>
+                <tr><td>/30</td><td>255.255.255.252</td><td>2</td><td>64</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--cyan)"></div><span class="kt-term">Network Address</span><span class="kt-def">First address in a subnet (all host bits = 0) — never assigned to a device</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--cyan)"></div><span class="kt-term">Broadcast Address</span><span class="kt-def">Last address in a subnet (all host bits = 1) — packets sent here reach all hosts on the subnet</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--cyan)"></div><span class="kt-term">Wildcard Mask</span><span class="kt-def">Inverse of the subnet mask — used in OSPF and ACLs to specify which bits to ignore</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 01: IP Subnetting
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: VLANs ───────────────────────────── -->
+      <article class="c-card" data-cat="switching" data-title="vlan virtual local area network segmentation">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#a78bfa,#4f8ef7)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(167,139,250,.1);color:var(--purple)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-sw">Switching</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">VLANs</div>
+          <div class="c-desc">Virtual LANs let you logically separate devices on the same physical switch as if they were on completely different networks — without buying extra hardware.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p>A <strong>VLAN (Virtual Local Area Network)</strong> is a logical grouping of switch ports. Devices in VLAN 10 can only communicate with other devices in VLAN 10 — even if they share the same physical switch with devices in VLAN 20. The switch treats each VLAN as a separate broadcast domain. This means a broadcast sent by a PC in VLAN 10 is never seen by PCs in VLAN 20.</p>
+              <p>VLANs are used for <strong>security</strong> (keep HR and Engineering traffic separate), <strong>performance</strong> (smaller broadcast domains = less noise), and <strong>network design flexibility</strong> (move a user to a new department by changing a port config, not physical cabling). Traffic between VLANs requires a router or Layer 3 switch — this is called <strong>inter-VLAN routing</strong>.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--purple)"></div><span class="kt-term">Access Port</span><span class="kt-def">A switch port that belongs to exactly one VLAN — used to connect end devices like PCs and printers</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--purple)"></div><span class="kt-term">Trunk Port</span><span class="kt-def">A switch port that carries traffic for multiple VLANs simultaneously — used between switches and routers</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--purple)"></div><span class="kt-term">Native VLAN</span><span class="kt-def">The VLAN that trunk traffic travels on untagged — VLAN 1 by default, best practice to change it</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--purple)"></div><span class="kt-term">VLAN Database</span><span class="kt-def">Stored in <code>vlan.dat</code> on Cisco switches — persists across reloads even without saving running-config</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 02: VLAN Segmentation
+              </a>
+              <a class="rel-lab-btn" href="lab.html?id=5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 05: Inter-VLAN Routing
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: 802.1Q TRUNKING ─────────────────── -->
+      <article class="c-card" data-cat="switching" data-title="802.1q trunking dot1q vlan tagging">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#a78bfa,#f5a623)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(167,139,250,.1);color:var(--purple)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-sw">Switching</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">802.1Q Trunking</div>
+          <div class="c-desc">The IEEE standard for carrying multiple VLANs over a single link. A 4-byte tag is inserted into the Ethernet frame header to identify which VLAN the traffic belongs to.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>IEEE 802.1Q</strong> (also called "dot1Q") is the standard that defines VLAN tagging on Ethernet frames. Without it, a switch carrying VLAN traffic between two switches would have no way to tell the receiving switch which frame belongs to which VLAN. The solution is a <strong>4-byte tag</strong> inserted into the Ethernet frame between the Source MAC address and the EtherType field.</p>
+              <p>This tag contains a <strong>12-bit VLAN ID</strong> field (VID), which supports VLAN numbers 0–4095. In practice VLANs 1–1005 are standard range and 1006–4094 are extended range. The tag is inserted as frames enter a trunk port and stripped before delivery to an access port — so end devices like PCs never see or handle 802.1Q tags.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--purple)"></div><span class="kt-term">Tagged Frame</span><span class="kt-def">An Ethernet frame with the 4-byte 802.1Q header inserted — travels on trunk ports</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--purple)"></div><span class="kt-term">Untagged Frame</span><span class="kt-def">A normal Ethernet frame with no VLAN tag — the switch assigns it to the native VLAN on a trunk, or the access VLAN on an access port</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--purple)"></div><span class="kt-term">TPID</span><span class="kt-def">Tag Protocol Identifier (0x8100) — the value in the EtherType field that signals an 802.1Q tag follows</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 02: VLAN Segmentation
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: STP ──────────────────────────────── -->
+      <article class="c-card" data-cat="switching" data-title="spanning tree protocol stp loop prevention rstp">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#f87171,#f5a623)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(248,113,113,.1);color:var(--red)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-sw">Switching</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">Spanning Tree Protocol</div>
+          <div class="c-desc">STP automatically detects and blocks switch links that would create loops. Without it, a broadcast storm would instantly crash your entire network.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>Spanning Tree Protocol (STP / IEEE 802.1D)</strong> solves a critical problem: Ethernet networks often have <strong>redundant paths</strong> for fault tolerance, but redundant paths create loops. A broadcast frame in a loop would be forwarded forever by every switch in the ring — consuming 100% of bandwidth in milliseconds. This is called a <strong>broadcast storm</strong>.</p>
+              <p>STP prevents this by electing a <strong>Root Bridge</strong> (the switch with the lowest Bridge ID), then calculating the shortest path from every switch to the root. Links that would create a loop are put in a <strong>Blocking</strong> state — they receive BPDUs but forward no user traffic. If a primary link fails, the blocked port transitions through Listening → Learning → <strong>Forwarding</strong>, restoring connectivity (taking up to 50 seconds in classic STP, reduced to ~1–4 seconds in <strong>RSTP / 802.1w</strong>).</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">Root Bridge</span><span class="kt-def">The switch elected as the "centre" of the spanning tree — has the lowest Bridge Priority + MAC address combination</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">BPDU</span><span class="kt-def">Bridge Protocol Data Unit — the control messages switches exchange every 2 seconds to maintain the spanning tree</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">Root Port</span><span class="kt-def">Each non-root switch's best port toward the Root Bridge — always in Forwarding state</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">RSTP</span><span class="kt-def">Rapid STP (802.1w) — replaces classic STP with faster convergence through direct negotiation between switches</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=3">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 03: STP &amp; Loop Prevention
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: ROUTING FUNDAMENTALS ────────────── -->
+      <article class="c-card" data-cat="routing" data-title="routing static dynamic routing table gateway">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#ff6b00,#f5a623)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(255,107,0,.1);color:var(--accent)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M9 6h6"/><path d="M6 9l6 9"/><path d="M18 9l-6 9"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-rt">Routing</span>
+              <span class="c-diff diff-int">Intermediate</span>
+            </div>
+          </div>
+          <div class="c-title">Routing Fundamentals</div>
+          <div class="c-desc">How routers decide where to send packets. Routing tables, static routes, dynamic routing protocols, and the concept of administrative distance.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p>A <strong>router</strong> operates at Layer 3 (Network). Its job is to receive a packet, look up the <strong>destination IP address</strong> in its <strong>routing table</strong>, and forward the packet out the appropriate interface. The routing table is a list of known destination networks along with the next-hop address or outgoing interface to reach them.</p>
+              <p><strong>Static routes</strong> are manually configured by an administrator — reliable but don't adapt to topology changes. <strong>Dynamic routing protocols</strong> (OSPF, EIGRP, BGP) let routers automatically learn paths from each other and recalculate when links fail. When multiple protocols advertise the same route, the router picks the one with the <strong>lowest administrative distance (AD)</strong> — a trustworthiness score. Connected routes have AD 0, static routes AD 1, OSPF AD 110, RIP AD 120.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--accent)"></div><span class="kt-term">Default Route</span><span class="kt-def"><code>0.0.0.0/0</code> — matches any destination. The "last resort" route used when nothing more specific exists</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--accent)"></div><span class="kt-term">Next Hop</span><span class="kt-def">The IP address of the next router to forward a packet to on the way to its destination</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--accent)"></div><span class="kt-term">Longest Prefix Match</span><span class="kt-def">When multiple routes match a destination, the router always picks the most specific one (highest prefix length)</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=4">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 04: OSPF Routing
+              </a>
+              <a class="rel-lab-btn" href="lab.html?id=5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 05: Inter-VLAN Routing
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: OSPF ─────────────────────────────── -->
+      <article class="c-card" data-cat="routing" data-title="ospf open shortest path first link state dijkstra">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#f5a623,#ff6b00)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(245,166,35,.1);color:var(--yellow)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-rt">Routing</span>
+              <span class="c-diff diff-int">Intermediate</span>
+            </div>
+          </div>
+          <div class="c-title">OSPF</div>
+          <div class="c-desc">Open Shortest Path First — the most widely deployed interior gateway protocol in enterprise networks. Uses Dijkstra's algorithm to compute the shortest loop-free path to every network.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>OSPF (RFC 2328)</strong> is a <strong>link-state routing protocol</strong>. Unlike distance-vector protocols that only know what their neighbours told them, every OSPF router maintains a full map of the network called the <strong>Link-State Database (LSDB)</strong>. Each router floods <strong>Link-State Advertisements (LSAs)</strong> so every router ends up with an identical picture of the network. From this map, each router independently runs <strong>Dijkstra's Shortest Path First (SPF)</strong> algorithm to build its routing table.</p>
+              <p>OSPF routers form <strong>adjacencies</strong> by exchanging Hello packets on each link. In multi-access networks (Ethernet), a <strong>Designated Router (DR)</strong> and Backup Designated Router (BDR) are elected to reduce the number of LSA floods — all other routers (DROthers) only form full adjacencies with the DR/BDR. OSPF uses <strong>cost</strong> as its metric, where cost = 10<sup>8</sup> / bandwidth. A FastEthernet link has cost 1; a slower link has a higher cost.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--yellow)"></div><span class="kt-term">Area</span><span class="kt-def">OSPF divides networks into areas. All routers must connect through Area 0 (backbone area)</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--yellow)"></div><span class="kt-term">Router ID</span><span class="kt-def">A 32-bit number (looks like an IP address) that uniquely identifies each OSPF router in the domain</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--yellow)"></div><span class="kt-term">LSA</span><span class="kt-def">Link-State Advertisement — the packet an OSPF router floods to share topology information with all neighbours</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--yellow)"></div><span class="kt-term">DR / BDR</span><span class="kt-def">Designated Router / Backup Designated Router — elected on multi-access segments to minimise flooding</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=4">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 04: OSPF Single-Area
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: BGP ──────────────────────────────── -->
+      <article class="c-card" data-cat="routing" data-title="bgp border gateway protocol autonomous system internet routing">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#ff6b00,#f87171)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(255,107,0,.1);color:var(--accent)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-rt">Routing</span>
+              <span class="c-diff diff-adv">Advanced</span>
+            </div>
+          </div>
+          <div class="c-title">BGP</div>
+          <div class="c-desc">The routing protocol that runs the internet. BGP exchanges reachability information between autonomous systems and makes policy-based path decisions at massive scale.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>BGP (Border Gateway Protocol)</strong> is the routing protocol of the internet. While OSPF and EIGRP are <em>interior</em> gateway protocols (they route within your network), BGP is an <em>exterior</em> gateway protocol that routes <em>between</em> networks — specifically between <strong>Autonomous Systems (ASes)</strong>. An AS is a network or group of networks under a single administrative control, identified by a unique <strong>AS number (ASN)</strong>.</p>
+              <p>BGP is a <strong>path-vector protocol</strong> — it advertises routes along with the list of AS numbers they've passed through (the AS-PATH). This makes loop prevention straightforward: if a router sees its own AS number in an advertised path, it discards the route. Unlike OSPF, BGP doesn't pick the fastest path — it picks the <strong>best policy path</strong> based on attributes like LOCAL_PREF, MED, and AS-PATH length. This policy-based routing is what lets ISPs control traffic engineering at internet scale.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--accent)"></div><span class="kt-term">eBGP</span><span class="kt-def">External BGP — sessions between routers in different AS numbers (e.g. you and your ISP)</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--accent)"></div><span class="kt-term">iBGP</span><span class="kt-def">Internal BGP — sessions between routers within the same AS (needs full mesh or route reflectors)</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--accent)"></div><span class="kt-term">AS-PATH</span><span class="kt-def">The list of AS numbers a route has traversed — shorter paths are preferred; used for loop prevention</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--accent)"></div><span class="kt-term">LOCAL_PREF</span><span class="kt-def">A BGP attribute set within an AS to prefer one exit point over another — higher value is preferred</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=8">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 08: BGP Peering
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: ACLs ─────────────────────────────── -->
+      <article class="c-card" data-cat="security" data-title="acl access control list permit deny traffic filter">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#f87171,#a78bfa)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(248,113,113,.1);color:var(--red)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-sec">Security</span>
+              <span class="c-diff diff-int">Intermediate</span>
+            </div>
+          </div>
+          <div class="c-title">Access Control Lists</div>
+          <div class="c-desc">ACLs are ordered lists of permit/deny rules applied to router interfaces. They filter traffic based on source/destination IP addresses, protocols, and ports.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>Access Control Lists (ACLs)</strong> are used on Cisco routers to <strong>permit or deny packets</strong> based on criteria you define. They are applied to a router interface in either the inbound or outbound direction. Every ACL ends with an implicit <strong>deny any</strong> — any packet that doesn't match a rule is dropped. This means you must always have at least one permit statement, or all traffic will be blocked.</p>
+              <p><strong>Standard ACLs</strong> (numbered 1–99) only match on the <strong>source IP address</strong>. They are simple but blunt. <strong>Extended ACLs</strong> (numbered 100–199) match on source IP, destination IP, protocol (TCP/UDP/ICMP), and port numbers — giving you fine-grained control. Best practice: place standard ACLs <strong>close to the destination</strong> and extended ACLs <strong>close to the source</strong> to stop unwanted traffic as early as possible.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">Implicit Deny</span><span class="kt-def">The invisible last rule in every ACL — <code>deny any any</code>. Unmatched traffic is always dropped</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">Wildcard Mask</span><span class="kt-def">Inverse of a subnet mask used in ACLs — a 1-bit means "don't care", a 0-bit means "must match"</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">Named ACL</span><span class="kt-def">ACLs that use a name instead of a number — easier to read and allows individual lines to be deleted</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=6">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 06: Access Control Lists
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: NAT & PAT ────────────────────────── -->
+      <article class="c-card" data-cat="security" data-title="nat pat network address translation port overload">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#f87171,#f5a623)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(248,113,113,.1);color:var(--red)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-sec">Security</span>
+              <span class="c-diff diff-adv">Advanced</span>
+            </div>
+          </div>
+          <div class="c-title">NAT &amp; PAT</div>
+          <div class="c-desc">Network Address Translation lets hundreds of private devices share a single public IP address. It's the technology that allows your home router to connect all your devices to the internet.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>NAT (Network Address Translation)</strong> is performed by a router sitting between a private network and the internet. When a device with private IP <code>192.168.1.10</code> sends a packet to the internet, the NAT router rewrites the source IP address to its own <strong>public IP address</strong> before forwarding the packet. When the reply comes back, NAT rewrites the destination back to <code>192.168.1.10</code> and delivers it. The external server only ever sees the router's public IP.</p>
+              <p><strong>PAT (Port Address Translation)</strong> — also called <em>NAT Overload</em> — extends this to allow many devices to share a single public IP simultaneously. It does this by tracking not just the IP address but also the <strong>source port number</strong>. Each translation entry in the NAT table maps an inside local address:port pair to the public IP:unique port. This is what every home router does by default — it's why IPv4 hasn't completely run out despite having billions of connected devices.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">Inside Local</span><span class="kt-def">The private IP address of a device on your internal network (e.g. 192.168.1.10)</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">Inside Global</span><span class="kt-def">The public IP address that represents your inside device to the outside world</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--red)"></div><span class="kt-term">NAT Table</span><span class="kt-def">The router's translation database mapping inside local addresses/ports to inside global addresses/ports</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=7">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 07: NAT &amp; PAT
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: DNS ──────────────────────────────── -->
+      <article class="c-card" data-cat="protocols" data-title="dns domain name system name resolution">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#22d3ee,#4f8ef7)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(34,211,238,.1);color:var(--cyan)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-proto">Protocols</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">DNS</div>
+          <div class="c-desc">The Domain Name System translates human-readable names like <code>google.com</code> into IP addresses computers can route to. It's the phonebook of the internet.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>DNS (Domain Name System)</strong> is a hierarchical, distributed database that maps domain names to IP addresses. When you type <code>google.com</code> into a browser, your computer asks a <strong>DNS resolver</strong> (usually your router or ISP) to look up the IP address. If the resolver doesn't have it cached, it works down the DNS hierarchy: first asking a <strong>Root server</strong>, then a <strong>TLD server</strong> (for <code>.com</code>), then the <strong>Authoritative server</strong> that holds the actual record.</p>
+              <p>DNS uses <strong>UDP port 53</strong> for standard queries (fast, low overhead) and <strong>TCP port 53</strong> for large responses and zone transfers. Common record types: <code>A</code> — IPv4 address, <code>AAAA</code> — IPv6 address, <code>CNAME</code> — alias to another name, <code>MX</code> — mail server, <code>PTR</code> — reverse lookup (IP to name). DNS results are cached by the TTL value in each record to reduce query load.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--cyan)"></div><span class="kt-term">Resolver</span><span class="kt-def">The DNS client — your device asks the resolver, which does the actual recursive lookup on your behalf</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--cyan)"></div><span class="kt-term">TTL</span><span class="kt-def">Time To Live — how long a DNS record should be cached (in seconds) before querying again</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--cyan)"></div><span class="kt-term">Zone Transfer</span><span class="kt-def">The process of copying DNS records from a primary to a secondary name server for redundancy</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: DHCP ─────────────────────────────── -->
+      <article class="c-card" data-cat="protocols" data-title="dhcp dynamic host configuration protocol ip assignment">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#4f8ef7,#22d3ee)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(79,142,247,.1);color:var(--blue)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-proto">Protocols</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">DHCP</div>
+          <div class="c-desc">Dynamic Host Configuration Protocol automatically assigns IP addresses, subnet masks, gateways, and DNS servers to devices when they join a network — no manual configuration needed.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p><strong>DHCP (Dynamic Host Configuration Protocol)</strong> automates the assignment of IP configuration to network devices. When a device connects to a network it broadcasts a <strong>DHCPDISCOVER</strong> message. A DHCP server responds with a <strong>DHCPOFFER</strong> containing an available IP address. The client formally requests that address with a <strong>DHCPREQUEST</strong> and the server confirms with a <strong>DHCPACK</strong>. This four-step process is called <strong>DORA</strong> (Discover, Offer, Request, Acknowledge).</p>
+              <p>DHCP leases are temporary — they expire after a configured time (the <strong>lease time</strong>). At 50% of the lease, the client tries to renew directly with the same server. At 87.5%, it broadcasts to any server. If the lease expires with no renewal, the client releases the address and starts DORA again. DHCP uses <strong>UDP ports 67 (server) and 68 (client)</strong>. A <strong>DHCP relay agent</strong> forwards DHCP broadcasts across router boundaries so a single server can serve multiple subnets.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">DORA</span><span class="kt-def">Discover → Offer → Request → Acknowledge — the four-message exchange to get an IP address from DHCP</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">DHCP Scope</span><span class="kt-def">The pool of IP addresses a DHCP server can assign on a given subnet</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">Exclusion Range</span><span class="kt-def">IP addresses within a scope that the DHCP server will never assign — used for printers, routers, servers with static IPs</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ─── CARD: ETHERNET & MAC ───────────────────── -->
+      <article class="c-card" data-cat="fundamentals" data-title="ethernet mac address arp layer 2 frame">
+        <div class="c-stripe" style="background:linear-gradient(90deg,#4f8ef7,#34d399)"></div>
+        <div class="c-body">
+          <div class="c-top">
+            <div class="c-icon" style="background:rgba(79,142,247,.1);color:var(--blue)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            </div>
+            <div class="c-badges">
+              <span class="c-cat cat-fund">Fundamentals</span>
+              <span class="c-diff diff-beg">Beginner</span>
+            </div>
+          </div>
+          <div class="c-title">Ethernet &amp; MAC Addressing</div>
+          <div class="c-desc">Ethernet is the Layer 2 technology that connects devices within the same network. MAC addresses uniquely identify every network interface — no two NICs in the world share the same MAC.</div>
+        </div>
+        <div class="c-footer">
+          <button class="c-expand-btn" onclick="toggleCard(this)">
+            <span>Show full explanation</span>
+            <svg class="c-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
+        <div class="c-expanded">
+          <div class="c-exp-section">
+            <div class="c-exp-title">What it is</div>
+            <div class="c-exp-body">
+              <p>A <strong>MAC (Media Access Control) address</strong> is a 48-bit hardware address burned into every network interface card (NIC) at manufacture. Written as six hexadecimal pairs (e.g. <code>00:1A:2B:3C:4D:5E</code>), the first 24 bits (OUI) identify the manufacturer, the last 24 bits are the device's unique serial. Unlike IP addresses, MAC addresses operate at <strong>Layer 2</strong> — they are only relevant on the local network segment.</p>
+              <p>When a device wants to send data to another device on the same subnet, it needs the destination's MAC address. It finds this using <strong>ARP (Address Resolution Protocol)</strong> — it broadcasts "who has IP 192.168.1.1?" and the device that owns that IP replies with its MAC address. The sender caches this result in its <strong>ARP table</strong>. Switches also learn MAC addresses this way, building a <strong>MAC address table</strong> that maps MAC addresses to switch ports so they can forward frames efficiently instead of flooding.</p>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Key Terms</div>
+            <div class="key-terms">
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">ARP</span><span class="kt-def">Address Resolution Protocol — resolves an IP address to a MAC address so a frame can be built and sent</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">CAM Table</span><span class="kt-def">Content Addressable Memory — a switch's MAC address table mapping MACs to physical ports</span></div>
+              <div class="key-term"><div class="kt-dot" style="background:var(--blue)"></div><span class="kt-term">Broadcast</span><span class="kt-def">Destination MAC FF:FF:FF:FF:FF:FF — delivered to every device in the same broadcast domain (VLAN)</span></div>
+            </div>
+          </div>
+          <div class="c-exp-section">
+            <div class="c-exp-title">Related Labs</div>
+            <div class="related-labs">
+              <a class="rel-lab-btn" href="lab.html?id=2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 02: VLAN Segmentation
+              </a>
+              <a class="rel-lab-btn" href="lab.html?id=3">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Lab 03: STP
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- No results placeholder -->
+      <div class="no-results" id="noResults">
+        <div class="no-results-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <h3>No concepts found</h3>
+        <p>Try a different search term or clear the filter to browse all topics.</p>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="8" height="8" rx="2"/><rect x="14" y="2" width="8" height="8" rx="2"/><rect x="2" y="14" width="8" height="8" rx="2"/><rect x="14" y="14" width="8" height="8" rx="2"/></svg>
+      Packet<span class="logo-dot">Path</span>
+    </div>
+    <div class="footer-links">
+      <a href="labs.html">Labs</a>
+      <a href="concepts.html">Concepts</a>
+      <a href="resources.html">Resources</a>
+    </div>
+    <span class="footer-copy">PacketPath — Networking Education</span>
+  </div>
+</footer>
+
+<script>
+// ─── THEME ──────────────────────────────────────────
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('pp_theme',t);
+  const icon=document.getElementById('themeIcon');
+  if(t==='light'){
+    icon.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  } else {
+    icon.innerHTML='<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+  }
+}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')}
+(function(){applyTheme(localStorage.getItem('pp_theme')||'dark')})();
+
+// ─── MOBILE MENU ─────────────────────────────────────
+function toggleMob(){
+  document.getElementById('hamburger').classList.toggle('open');
+  document.getElementById('mobMenu').classList.toggle('open');
+}
+
+// ─── FILTER STATE ─────────────────────────────────────
+let activeFilter='all';
+
+function setFilter(cat,el){
+  activeFilter=cat;
+  document.querySelectorAll('#filterChips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  filterCards();
+}
+
+function filterCards(){
+  const q=document.getElementById('searchInput').value.toLowerCase().trim();
+  const cards=document.querySelectorAll('.c-card');
+  let visible=0;
+  cards.forEach(card=>{
+    const catMatch=activeFilter==='all'||card.dataset.cat===activeFilter;
+    const textMatch=!q||card.dataset.title.includes(q)||card.querySelector('.c-title').textContent.toLowerCase().includes(q)||card.querySelector('.c-desc').textContent.toLowerCase().includes(q);
+    const show=catMatch&&textMatch;
+    card.classList.toggle('hidden',!show);
+    if(show) visible++;
+  });
+  const count=document.getElementById('resultsCount');
+  count.textContent=visible===cards.length?'':visible+' result'+(visible===1?'':'s');
+  const noRes=document.getElementById('noResults');
+  noRes.classList.toggle('show',visible===0);
+}
+
+// ─── EXPAND / COLLAPSE ─────────────────────────────────
+function toggleCard(btn){
+  const card=btn.closest('.c-card');
+  const expanded=card.querySelector('.c-expanded');
+  const isOpen=expanded.classList.toggle('open');
+  btn.classList.toggle('open',isOpen);
+  btn.querySelector('span').textContent=isOpen?'Hide explanation':'Show full explanation';
+  // Close other open cards (optional — comment out to allow multiple open)
+  document.querySelectorAll('.c-card').forEach(c=>{
+    if(c!==card){
+      const e=c.querySelector('.c-expanded');
+      const b=c.querySelector('.c-expand-btn');
+      if(e&&e.classList.contains('open')){
+        e.classList.remove('open');
+        b.classList.remove('open');
+        b.querySelector('span').textContent='Show full explanation';
+      }
+    }
+  });
+}
+
+// Initial count
+filterCards();
+</script>
+</body>
+</html>
