@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PacketPath — Resources</title>
+<style>
+/* ─── TOKENS ──────────────────────────────────────── */
+:root {
+  --bg:      #080810;
+  --surface: #0e0e1c;
+  --card:    #111124;
+  --border:  #1c1c32;
+  --text:    #f0f0fc;
+  --text2:   #6a6a90;
+  --muted:   #24243c;
+  --accent:  #ff6b00;
+  --blue:    #4f8ef7;
+  --green:   #34d399;
+  --yellow:  #f5a623;
+  --red:     #f87171;
+  --purple:  #a78bfa;
+  --cyan:    #22d3ee;
+  --nav-h:   58px;
+  --font:    -apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+  --mono:    'SF Mono','Fira Code',Consolas,monospace;
+  --r:       10px;
+  --ease:    cubic-bezier(.22,.68,0,1.2);
+}
+[data-theme="light"] {
+  --bg:      #f2f2ee;
+  --surface: #ffffff;
+  --card:    #ffffff;
+  --border:  #e0e0ea;
+  --text:    #0a0a14;
+  --text2:   #52527a;
+  --muted:   #c8c8dc;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s;line-height:1.6}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+svg{display:block}
+code{font-family:var(--mono);font-size:.88em;background:rgba(255,255,255,.07);padding:1px 5px;border-radius:4px}
+[data-theme="light"] code{background:rgba(0,0,0,.06)}
+
+/* ─── NAV ─────────────────────────────────────────── */
+nav{position:fixed;inset:0 0 auto;height:var(--nav-h);z-index:200;display:flex;align-items:center;padding:0 28px;background:rgba(8,8,16,.94);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.07)}
+[data-theme="light"] nav{background:rgba(242,242,238,.94);border-color:var(--border)}
+.nav-logo{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;letter-spacing:-.3px;flex-shrink:0}
+.nav-logo svg{width:22px;height:22px}
+.logo-dot{color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:2px;margin:0 auto}
+.nav-links a{padding:6px 13px;border-radius:7px;font-size:13.5px;font-weight:500;color:var(--text2);transition:color .2s,background .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--text);background:rgba(255,255,255,.06)}
+.nav-links a.active{color:var(--accent)}
+[data-theme="light"] .nav-links a:hover{background:rgba(0,0,0,.05)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:color .2s,background .2s}
+.btn-icon:hover{color:var(--text);background:rgba(255,255,255,.07)}
+[data-theme="light"] .btn-icon:hover{background:rgba(0,0,0,.06)}
+.hamburger{display:none;width:34px;height:34px;flex-direction:column;justify-content:center;align-items:center;gap:5px;border-radius:7px}
+.hamburger span{display:block;width:17px;height:1.5px;background:var(--text2);border-radius:2px;transition:transform .28s var(--ease),opacity .2s}
+.hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.mob-menu{position:fixed;inset:var(--nav-h) 0 0;background:var(--bg);z-index:190;padding:16px 20px;display:flex;flex-direction:column;gap:4px;opacity:0;pointer-events:none;transform:translateY(-10px);transition:opacity .22s,transform .22s}
+.mob-menu.open{opacity:1;pointer-events:all;transform:none}
+.mob-menu a{padding:13px 14px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text2)}
+.mob-menu a:hover{color:var(--text);background:rgba(255,255,255,.06)}
+
+/* ─── PAGE ─────────────────────────────────────────── */
+.page{padding-top:var(--nav-h);min-height:100vh}
+
+/* ─── HERO ─────────────────────────────────────────── */
+.hero{padding:60px 28px 48px;max-width:1120px;margin:0 auto;border-bottom:1px solid var(--border)}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:99px;background:rgba(255,107,0,.09);border:1px solid rgba(255,107,0,.22);font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-size:clamp(30px,4vw,50px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:12px}
+.hero p{font-size:15.5px;color:var(--text2);max-width:560px;line-height:1.7}
+
+/* ─── PAGE CONTENT ─────────────────────────────────── */
+.content{max-width:1120px;margin:0 auto;padding:48px 28px 80px;display:flex;flex-direction:column;gap:56px}
+
+/* ─── SECTION HEADER ────────────────────────────────── */
+.sec-hdr{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.sec-hdr-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.si-orange{background:rgba(255,107,0,.1);color:var(--accent)}
+.si-blue{background:rgba(79,142,247,.1);color:var(--blue)}
+.si-green{background:rgba(52,211,153,.1);color:var(--green)}
+.si-yellow{background:rgba(245,166,35,.1);color:var(--yellow)}
+.si-purple{background:rgba(167,139,250,.1);color:var(--purple)}
+.sec-hdr-text h2{font-size:19px;font-weight:700;letter-spacing:-.4px}
+.sec-hdr-text p{font-size:13.5px;color:var(--text2);margin-top:3px}
+
+/* ─── REFERENCE TABLES ─────────────────────────────── */
+.ref-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+.ref-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.ref-table thead tr{background:rgba(255,255,255,.025)}
+[data-theme="light"] .ref-table thead tr{background:rgba(0,0,0,.03)}
+.ref-table th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);white-space:nowrap;border-bottom:1px solid var(--border)}
+.ref-table td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top}
+[data-theme="light"] .ref-table td{border-bottom:1px solid var(--border)}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:rgba(255,255,255,.02)}
+[data-theme="light"] .ref-table tr:hover td{background:rgba(0,0,0,.02)}
+.td-cmd{font-family:var(--mono);font-size:12.5px;color:var(--blue);white-space:nowrap}
+.td-mode{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:5px;display:inline-block;white-space:nowrap}
+.mode-priv{background:rgba(248,113,113,.1);color:var(--red)}
+.mode-conf{background:rgba(245,166,35,.1);color:var(--yellow)}
+.mode-if{background:rgba(79,142,247,.1);color:var(--blue)}
+.mode-user{background:rgba(52,211,153,.1);color:var(--green)}
+.mode-vlan{background:rgba(167,139,250,.1);color:var(--purple)}
+.td-desc{color:var(--text2);font-size:13px;line-height:1.5}
+.td-desc strong{color:var(--text);font-weight:600}
+
+/* ─── COMMAND CATEGORIES (tabs) ─────────────────────── */
+.cmd-tabs{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:16px}
+.cmd-tab{padding:7px 15px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text2);border:1px solid var(--border);transition:all .18s}
+.cmd-tab:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.cmd-tab.active{color:var(--text);background:var(--card);border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,107,0,.15)}
+.cmd-panel{display:none}
+.cmd-panel.active{display:block}
+
+/* ─── SUBNET TABLE ─────────────────────────────────── */
+.subnet-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.subnet-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.subnet-card-hdr{padding:12px 16px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+[data-theme="light"] .subnet-card-hdr{background:rgba(0,0,0,.03)}
+.subnet-card-hdr span{font-size:11px;font-weight:600;color:var(--text2)}
+
+/* ─── PORT TABLE ───────────────────────────────────── */
+.port-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* ─── DOWNLOAD CARDS ───────────────────────────────── */
+.dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.dl-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:16px;transition:border-color .2s,box-shadow .2s}
+.dl-card:hover{border-color:rgba(255,255,255,.14);box-shadow:0 8px 28px rgba(0,0,0,.28)}
+[data-theme="light"] .dl-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.1)}
+.dl-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center}
+.dl-card-title{font-size:16px;font-weight:700;letter-spacing:-.2px}
+.dl-card-desc{font-size:13px;color:var(--text2);line-height:1.6;flex:1}
+.dl-card-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dl-badge{padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.dl-free{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.2)}
+.dl-freemium{background:rgba(245,166,35,.1);color:var(--yellow);border:1px solid rgba(245,166,35,.2)}
+.dl-link{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;border-radius:8px;transition:opacity .18s;margin-top:auto}
+.dl-link:hover{opacity:.85}
+.dl-link svg{width:13px;height:13px}
+.dl-card-platforms{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px}
+.dl-card-platforms svg{flex-shrink:0}
+
+/* ─── KEY COMBOS ───────────────────────────────────── */
+.tip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.tip-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px}
+.tip-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.tip-text strong{display:block;font-size:13.5px;font-weight:600;margin-bottom:3px}
+.tip-text span{font-size:13px;color:var(--text2);line-height:1.5}
+kbd{display:inline-block;padding:1px 7px;background:var(--muted);border:1px solid rgba(255,255,255,.12);border-radius:5px;font-family:var(--mono);font-size:11.5px;color:var(--text);box-shadow:0 1px 0 rgba(255,255,255,.07)}
+[data-theme="light"] kbd{background:var(--border);border-color:rgba(0,0,0,.15);box-shadow:0 1px 0 rgba(0,0,0,.1)}
+
+/* ─── NOTE CALLOUT ─────────────────────────────────── */
+.note{display:flex;align-items:flex-start;gap:11px;padding:14px 16px;background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.18);border-left:3px solid var(--yellow);border-radius:9px;font-size:13.5px;color:var(--text2);line-height:1.65;margin-bottom:18px}
+.note strong{color:var(--text)}
+
+/* ─── FOOTER ────────────────────────────────────────── */
+footer{border-top:1px solid var(--border);padding:36px 28px}
+.footer-inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;letter-spacing:-.3px}
+.footer-links{display:flex;align-items:center;gap:20px;font-size:13px;color:var(--text2)}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12px;color:var(--text2)}
+
+/* ─── RESPONSIVE ────────────────────────────────────── */
+@media(max-width:768px){
+  .nav-links,.nav-right .btn-icon:not(.theme-btn){display:none}
+  .hamburger{display:flex}
+  .hero{padding:40px 20px 36px}
+  .content{padding:32px 20px 60px;gap:40px}
+  .subnet-grid,.port-cols{grid-template-columns:1fr}
+  .dl-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="packetpath.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="2" width="8" height="8" rx="2"/><rect x="14" y="2" width="8" height="8" rx="2"/>
+      <rect x="2" y="14" width="8" height="8" rx="2"/><rect x="14" y="14" width="8" height="8" rx="2"/>
+    </svg>
+    Packet<span class="logo-dot">Path</span>
+  </a>
+  <div class="nav-links">
+    <a href="labs.html">Labs</a>
+    <a href="concepts.html">Concepts</a>
+    <a href="resources.html" class="active">Resources</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn-icon theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+      <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+    <button class="hamburger" id="hamburger" onclick="toggleMob()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <a href="packetpath.html">Home</a>
+  <a href="labs.html">Labs</a>
+  <a href="concepts.html">Concepts</a>
+  <a href="resources.html">Resources</a>
+</div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Quick Reference
+    </div>
+    <h1>Resources</h1>
+    <p>Cisco IOS command cheat sheets, subnet tables, port numbers, and download links for every simulator used in the labs. Keep this page open while you work.</p>
+  </section>
+
+  <div class="content">
+
+    <!-- ─── SECTION 1: IOS COMMANDS ─────────────────── -->
+    <section id="commands">
+      <div class="sec-hdr">
+        <div class="sec-hdr-icon si-blue">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </div>
+        <div class="sec-hdr-text">
+          <h2>Cisco IOS Command Reference</h2>
+          <p>Organised by category — click a tab to jump to that section. Mode abbreviations: Priv = privileged EXEC, Conf = global config, If = interface config.</p>
+        </div>
+      </div>
+
+      <div class="cmd-tabs" role="tablist">
+        <button class="cmd-tab active" onclick="showTab('tab-show',this)">Show / Verify</button>
+        <button class="cmd-tab" onclick="showTab('tab-basic',this)">Basic Config</button>
+        <button class="cmd-tab" onclick="showTab('tab-vlan',this)">VLANs &amp; Trunking</button>
+        <button class="cmd-tab" onclick="showTab('tab-routing',this)">Routing</button>
+        <button class="cmd-tab" onclick="showTab('tab-ospf',this)">OSPF</button>
+        <button class="cmd-tab" onclick="showTab('tab-acl',this)">ACLs</button>
+        <button class="cmd-tab" onclick="showTab('tab-nat',this)">NAT / PAT</button>
+        <button class="cmd-tab" onclick="showTab('tab-debug',this)">Debug / Troubleshoot</button>
+      </div>
+
+      <!-- SHOW / VERIFY -->
+      <div class="cmd-panel active" id="tab-show">
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Command</th><th>Mode</th><th>What it shows</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">show running-config</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">The current active configuration in RAM — <strong>most-used verification command</strong></td></tr>
+              <tr><td class="td-cmd">show startup-config</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">The saved configuration in NVRAM — what the device loads on next reboot</td></tr>
+              <tr><td class="td-cmd">show version</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">IOS version, uptime, hardware model, memory, licence info</td></tr>
+              <tr><td class="td-cmd">show ip interface brief</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">One-line status of every interface — IP, status (up/down), and protocol (up/down)</td></tr>
+              <tr><td class="td-cmd">show interfaces</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Detailed stats for all interfaces — errors, bandwidth, duplex, MTU</td></tr>
+              <tr><td class="td-cmd">show interfaces <em>Gi0/0</em></td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Detailed stats for a specific interface (replace Gi0/0 with your interface name)</td></tr>
+              <tr><td class="td-cmd">show ip route</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Full routing table — all known routes with source codes (C=connected, S=static, O=OSPF)</td></tr>
+              <tr><td class="td-cmd">show arp</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">ARP cache — IP-to-MAC mappings the device has learned</td></tr>
+              <tr><td class="td-cmd">show mac address-table</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Switch MAC table — which MAC addresses are learned on which ports and VLANs</td></tr>
+              <tr><td class="td-cmd">show vlan brief</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">List of all VLANs and which ports are assigned to each</td></tr>
+              <tr><td class="td-cmd">show interfaces trunk</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Active trunk ports, their encapsulation, native VLAN, and VLANs allowed/active</td></tr>
+              <tr><td class="td-cmd">show spanning-tree</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">STP topology — root bridge, port roles (Root/Designated/Blocked), port states</td></tr>
+              <tr><td class="td-cmd">show ip ospf neighbor</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">OSPF adjacency table — neighbour IDs, states (should be FULL), dead timer</td></tr>
+              <tr><td class="td-cmd">show ip ospf database</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">OSPF Link-State Database — all LSAs the router has received</td></tr>
+              <tr><td class="td-cmd">show access-lists</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">All configured ACLs and their match counters</td></tr>
+              <tr><td class="td-cmd">show ip nat translations</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Active NAT translation table entries</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BASIC CONFIG -->
+      <div class="cmd-panel" id="tab-basic">
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Command</th><th>Mode</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">enable</td><td><span class="td-mode mode-user">User EXEC</span></td><td class="td-desc">Enter privileged EXEC mode — required before any configuration or verification commands</td></tr>
+              <tr><td class="td-cmd">configure terminal</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Enter global configuration mode — all configuration changes start here</td></tr>
+              <tr><td class="td-cmd">hostname <em>name</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Set the device's hostname — shown in the prompt and in <code>show version</code></td></tr>
+              <tr><td class="td-cmd">enable secret <em>password</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Set an <strong>MD5-hashed</strong> password for privileged EXEC — always use <code>secret</code> instead of <code>password</code></td></tr>
+              <tr><td class="td-cmd">line console 0</td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Enter console line config — used to set console login password</td></tr>
+              <tr><td class="td-cmd">line vty 0 4</td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Enter virtual terminal (SSH/Telnet) line config — 0 4 covers all 5 vty lines</td></tr>
+              <tr><td class="td-cmd">password <em>pass</em> / login</td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Set a line password and enable login prompt on that line</td></tr>
+              <tr><td class="td-cmd">service password-encryption</td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Encrypts all plaintext passwords in the config with weak Type 7 encoding</td></tr>
+              <tr><td class="td-cmd">banner motd # <em>message</em> #</td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Set a login warning banner — the <code>#</code> is the delimiter, any character works</td></tr>
+              <tr><td class="td-cmd">interface <em>Gi0/0</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Enter interface configuration for a specific interface (Fa0/0, Gi0/0, etc.)</td></tr>
+              <tr><td class="td-cmd">ip address <em>X.X.X.X M.M.M.M</em></td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Assign an IP address and subnet mask to the interface</td></tr>
+              <tr><td class="td-cmd">no shutdown</td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Bring the interface up — router interfaces are <strong>shutdown by default</strong>, this enables them</td></tr>
+              <tr><td class="td-cmd">description <em>text</em></td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Add a text label to an interface — visible in <code>show interfaces</code> and running-config</td></tr>
+              <tr><td class="td-cmd">copy running-config startup-config</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc"><strong>Save the configuration.</strong> Without this, all changes are lost on reboot. Shortcut: <code>wr</code></td></tr>
+              <tr><td class="td-cmd">reload</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Reboot the device — loads startup-config. Useful to test if config survives a reboot</td></tr>
+              <tr><td class="td-cmd">erase startup-config</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Wipe the saved config from NVRAM — device will boot with blank config after next reload</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VLANS & TRUNKING -->
+      <div class="cmd-panel" id="tab-vlan">
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Command</th><th>Mode</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">vlan <em>10</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Create VLAN 10 and enter VLAN config mode — the VLAN is saved to <code>vlan.dat</code></td></tr>
+              <tr><td class="td-cmd">name <em>VLAN_NAME</em></td><td><span class="td-mode mode-vlan">VLAN Config</span></td><td class="td-desc">Assign a descriptive name to the VLAN — best practice for readability</td></tr>
+              <tr><td class="td-cmd">interface <em>Fa0/1</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Enter interface config to assign it to a VLAN</td></tr>
+              <tr><td class="td-cmd">switchport mode access</td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Set the port to access mode — connects to a single end device, carries one VLAN only</td></tr>
+              <tr><td class="td-cmd">switchport access vlan <em>10</em></td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Assign the access port to VLAN 10</td></tr>
+              <tr><td class="td-cmd">switchport mode trunk</td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Set the port to trunk mode — carries traffic for multiple VLANs between switches</td></tr>
+              <tr><td class="td-cmd">switchport trunk native vlan <em>99</em></td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Change the native VLAN from the default (VLAN 1) to VLAN 99 — security best practice</td></tr>
+              <tr><td class="td-cmd">switchport trunk allowed vlan <em>10,20,99</em></td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Restrict which VLANs are allowed to traverse this trunk link</td></tr>
+              <tr><td class="td-cmd">no vlan <em>10</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Delete VLAN 10 — ports assigned to it will go inactive</td></tr>
+              <tr><td class="td-cmd">interface vlan <em>10</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Create an SVI (Switched Virtual Interface) — used for inter-VLAN routing on L3 switches</td></tr>
+              <tr><td class="td-cmd">ip routing</td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Enable Layer 3 routing on a multilayer switch — required for inter-VLAN routing</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ROUTING -->
+      <div class="cmd-panel" id="tab-routing">
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Command</th><th>Mode</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">ip route <em>network mask nexthop</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Add a static route — e.g. <code>ip route 10.0.0.0 255.255.255.0 192.168.1.1</code></td></tr>
+              <tr><td class="td-cmd">ip route 0.0.0.0 0.0.0.0 <em>nexthop</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Default route — forward all unmatched traffic to this next hop (your ISP or gateway)</td></tr>
+              <tr><td class="td-cmd">no ip route <em>network mask nexthop</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Remove a static route from the routing table</td></tr>
+              <tr><td class="td-cmd">show ip route static</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Show only static routes in the routing table</td></tr>
+              <tr><td class="td-cmd">show ip route connected</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Show only directly connected networks (interfaces that are up with an IP)</td></tr>
+              <tr><td class="td-cmd">ping <em>X.X.X.X</em></td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Test reachability to an IP address using ICMP echo — 5 packets by default</td></tr>
+              <tr><td class="td-cmd">traceroute <em>X.X.X.X</em></td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Trace the hop-by-hop path packets take to a destination — invaluable for troubleshooting</td></tr>
+              <tr><td class="td-cmd">ip default-gateway <em>X.X.X.X</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Set default gateway on a <strong>switch</strong> (not a router) — used when the switch needs management access</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- OSPF -->
+      <div class="cmd-panel" id="tab-ospf">
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Command</th><th>Mode</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">router ospf <em>1</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Enable OSPF process 1 and enter OSPF config mode — process ID is locally significant only</td></tr>
+              <tr><td class="td-cmd">router-id <em>1.1.1.1</em></td><td><span class="td-mode mode-conf">OSPF Config</span></td><td class="td-desc">Manually set the OSPF Router ID — strongly recommended over letting IOS auto-select one</td></tr>
+              <tr><td class="td-cmd">network <em>X.X.X.X W.W.W.W</em> area <em>0</em></td><td><span class="td-mode mode-conf">OSPF Config</span></td><td class="td-desc">Advertise networks into OSPF — <strong>W.W.W.W is the wildcard mask</strong> (inverse of subnet mask)</td></tr>
+              <tr><td class="td-cmd">passive-interface <em>Gi0/0</em></td><td><span class="td-mode mode-conf">OSPF Config</span></td><td class="td-desc">Stop OSPF hellos on an interface (e.g. LAN-facing ports) but still advertise the network</td></tr>
+              <tr><td class="td-cmd">passive-interface default</td><td><span class="td-mode mode-conf">OSPF Config</span></td><td class="td-desc">Make all interfaces passive by default — then selectively enable with <code>no passive-interface</code></td></tr>
+              <tr><td class="td-cmd">default-information originate</td><td><span class="td-mode mode-conf">OSPF Config</span></td><td class="td-desc">Advertise the default route (0.0.0.0/0) into OSPF so other routers learn how to reach the internet</td></tr>
+              <tr><td class="td-cmd">auto-cost reference-bandwidth <em>1000</em></td><td><span class="td-mode mode-conf">OSPF Config</span></td><td class="td-desc">Adjust the reference bandwidth to 1000 Mbps — ensures GigE and FastE have different costs</td></tr>
+              <tr><td class="td-cmd">show ip ospf</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">OSPF process info — Router ID, area, SPF count, timers</td></tr>
+              <tr><td class="td-cmd">show ip ospf neighbor</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Neighbour table — state must be <strong>FULL</strong> for correct operation (2WAY is ok for DROthers)</td></tr>
+              <tr><td class="td-cmd">clear ip ospf process</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Restart the OSPF process — forces re-election of Router ID and DR/BDR</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ACLs -->
+      <div class="cmd-panel" id="tab-acl">
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Command</th><th>Mode</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">access-list <em>10</em> permit <em>X.X.X.X W.W.W.W</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Standard ACL (1–99) — permit traffic from matching source IPs. W.W.W.W = wildcard mask</td></tr>
+              <tr><td class="td-cmd">access-list <em>100</em> permit tcp <em>src wild</em> <em>dst wild</em> eq <em>80</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Extended ACL (100–199) — permit TCP traffic from source to destination on port 80</td></tr>
+              <tr><td class="td-cmd">access-list <em>100</em> deny ip any any</td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Explicit deny all — the implicit deny is invisible, adding this makes it visible in <code>show access-lists</code></td></tr>
+              <tr><td class="td-cmd">ip access-list extended <em>NAME</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Create a named extended ACL — easier to read and allows deleting individual lines by sequence number</td></tr>
+              <tr><td class="td-cmd">interface <em>Gi0/0</em> → ip access-group <em>NAME</em> in</td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Apply ACL to an interface in the <strong>inbound</strong> direction — filters packets arriving on this interface</td></tr>
+              <tr><td class="td-cmd">ip access-group <em>NAME</em> out</td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Apply ACL in the <strong>outbound</strong> direction — filters packets leaving this interface</td></tr>
+              <tr><td class="td-cmd">show access-lists</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Show all ACLs with match counters — useful to verify which rules are hitting traffic</td></tr>
+              <tr><td class="td-cmd">show ip interface <em>Gi0/0</em></td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Confirm which ACL is applied inbound/outbound on a specific interface</td></tr>
+              <tr><td class="td-cmd">no access-list <em>10</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Delete an entire numbered ACL — <strong>careful:</strong> this removes all rules at once</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NAT / PAT -->
+      <div class="cmd-panel" id="tab-nat">
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Command</th><th>Mode</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">ip nat inside source list <em>1</em> interface <em>Gi0/1</em> overload</td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc"><strong>PAT (overload)</strong> — translate all IPs matching ACL 1 to the router's outbound interface IP. "overload" = many-to-one</td></tr>
+              <tr><td class="td-cmd">ip nat inside source static <em>10.0.0.10 203.0.113.10</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Static NAT — permanently map one inside local IP to one inside global IP (e.g. for a web server)</td></tr>
+              <tr><td class="td-cmd">ip nat inside source list <em>1</em> pool <em>POOL</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Dynamic NAT using a pool — translate IPs in ACL 1 to an address from the named pool</td></tr>
+              <tr><td class="td-cmd">ip nat pool <em>POOL start end</em> netmask <em>mask</em></td><td><span class="td-mode mode-conf">Global Config</span></td><td class="td-desc">Define a NAT pool of public IP addresses to use for dynamic NAT translations</td></tr>
+              <tr><td class="td-cmd">interface <em>Gi0/0</em> → ip nat inside</td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Mark this interface as <strong>inside</strong> — faces the private network</td></tr>
+              <tr><td class="td-cmd">interface <em>Gi0/1</em> → ip nat outside</td><td><span class="td-mode mode-if">Interface</span></td><td class="td-desc">Mark this interface as <strong>outside</strong> — faces the public/internet side</td></tr>
+              <tr><td class="td-cmd">show ip nat translations</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Show the active NAT translation table — each active session has an entry here</td></tr>
+              <tr><td class="td-cmd">clear ip nat translation *</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Clear all dynamic NAT translations — useful when troubleshooting or testing changes</td></tr>
+              <tr><td class="td-cmd">show ip nat statistics</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">NAT counters — total translations, hits, misses, inside/outside interfaces</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DEBUG / TROUBLESHOOT -->
+      <div class="cmd-panel" id="tab-debug">
+        <div class="note">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2.5" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span><strong>Caution in production:</strong> Debug commands generate real-time output and can consume significant CPU on a live device. Always use <code>undebug all</code> to stop debugging when finished.</span>
+        </div>
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Command</th><th>Mode</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">ping <em>X.X.X.X</em></td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Basic ICMP connectivity test — 5 packets, <code>!!!!!</code> = success, <code>.....</code> = timeout, <code>UUUUU</code> = unreachable</td></tr>
+              <tr><td class="td-cmd">ping <em>X.X.X.X</em> source <em>Y.Y.Y.Y</em></td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Extended ping specifying the source IP — tests routing from a specific interface</td></tr>
+              <tr><td class="td-cmd">traceroute <em>X.X.X.X</em></td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Show each router hop on the path — identifies exactly where connectivity breaks</td></tr>
+              <tr><td class="td-cmd">debug ip routing</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Real-time output when routes are added or removed from the routing table</td></tr>
+              <tr><td class="td-cmd">debug ip ospf events</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">OSPF event messages — adjacency changes, DR elections, SPF calculations</td></tr>
+              <tr><td class="td-cmd">debug ip nat</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Show each NAT translation event in real time — confirms NAT is working on active traffic</td></tr>
+              <tr><td class="td-cmd">debug spanning-tree events</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">STP topology change events — port state transitions, root bridge elections</td></tr>
+              <tr><td class="td-cmd">undebug all</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc"><strong>Stop all active debugging.</strong> Shortcut: <code>u all</code>. Always run this when done</td></tr>
+              <tr><td class="td-cmd">terminal monitor</td><td><span class="td-mode mode-priv">Privileged</span></td><td class="td-desc">Show debug output on a remote SSH/Telnet session (not shown by default on VTY lines)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 2: SUBNET CHEAT SHEET ───────────── -->
+    <section id="subnets">
+      <div class="sec-hdr">
+        <div class="sec-hdr-icon si-green">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </div>
+        <div class="sec-hdr-text">
+          <h2>Subnet Mask Cheat Sheet</h2>
+          <p>CIDR to subnet mask conversion, host counts, and number of subnets per class C block.</p>
+        </div>
+      </div>
+      <div class="ref-table-wrap">
+        <table class="ref-table">
+          <thead><tr><th>CIDR Prefix</th><th>Subnet Mask</th><th>Usable Hosts</th><th>Subnets from /24</th><th>Common Use</th></tr></thead>
+          <tbody>
+            <tr><td class="td-cmd">/8</td><td class="td-cmd">255.0.0.0</td><td>16,777,214</td><td>—</td><td class="td-desc">Class A — ISPs, very large organisations</td></tr>
+            <tr><td class="td-cmd">/16</td><td class="td-cmd">255.255.0.0</td><td>65,534</td><td>—</td><td class="td-desc">Class B — large enterprise networks</td></tr>
+            <tr><td class="td-cmd">/20</td><td class="td-cmd">255.255.240.0</td><td>4,094</td><td>16</td><td class="td-desc">Large campus networks</td></tr>
+            <tr><td class="td-cmd">/21</td><td class="td-cmd">255.255.248.0</td><td>2,046</td><td>8</td><td class="td-desc">Medium campus or data centre</td></tr>
+            <tr><td class="td-cmd">/22</td><td class="td-cmd">255.255.252.0</td><td>1,022</td><td>4</td><td class="td-desc">Medium enterprise floor/building</td></tr>
+            <tr><td class="td-cmd">/23</td><td class="td-cmd">255.255.254.0</td><td>510</td><td>2</td><td class="td-desc">Mid-size networks</td></tr>
+            <tr><td class="td-cmd">/24</td><td class="td-cmd">255.255.255.0</td><td>254</td><td>1</td><td class="td-desc" style="color:var(--accent);font-weight:600">Most common — home, small office, labs</td></tr>
+            <tr><td class="td-cmd">/25</td><td class="td-cmd">255.255.255.128</td><td>126</td><td>2</td><td class="td-desc">Split a /24 in half</td></tr>
+            <tr><td class="td-cmd">/26</td><td class="td-cmd">255.255.255.192</td><td>62</td><td>4</td><td class="td-desc">Department-level segmentation</td></tr>
+            <tr><td class="td-cmd">/27</td><td class="td-cmd">255.255.255.224</td><td>30</td><td>8</td><td class="td-desc">Small department (30 devices max)</td></tr>
+            <tr><td class="td-cmd">/28</td><td class="td-cmd">255.255.255.240</td><td>14</td><td>16</td><td class="td-desc">Small segments — printers, servers</td></tr>
+            <tr><td class="td-cmd">/29</td><td class="td-cmd">255.255.255.248</td><td>6</td><td>32</td><td class="td-desc">Very small segments, router clusters</td></tr>
+            <tr><td class="td-cmd">/30</td><td class="td-cmd">255.255.255.252</td><td>2</td><td>64</td><td class="td-desc" style="color:var(--accent);font-weight:600">Point-to-point router links — 2 usable hosts only</td></tr>
+            <tr><td class="td-cmd">/31</td><td class="td-cmd">255.255.255.254</td><td>2*</td><td>128</td><td class="td-desc">Point-to-point links (RFC 3021 — no network/broadcast reservation)</td></tr>
+            <tr><td class="td-cmd">/32</td><td class="td-cmd">255.255.255.255</td><td>1</td><td>256</td><td class="td-desc">Host route — a single specific IP address (loopbacks, static host routes)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 3: PORT NUMBERS ────────────────── -->
+    <section id="ports">
+      <div class="sec-hdr">
+        <div class="sec-hdr-icon si-yellow">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="sec-hdr-text">
+          <h2>Common Port Numbers</h2>
+          <p>Well-known ports (0–1023) you'll see in ACLs, firewall rules, and Wireshark captures. The exam expects you to know these cold.</p>
+        </div>
+      </div>
+      <div class="port-cols">
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Port</th><th>Protocol</th><th>Service</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">20</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">FTP — Data transfer</td></tr>
+              <tr><td class="td-cmd">21</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">FTP — Control (commands)</td></tr>
+              <tr><td class="td-cmd">22</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc"><strong>SSH</strong> — Secure remote access</td></tr>
+              <tr><td class="td-cmd">23</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">Telnet — Insecure remote access (avoid)</td></tr>
+              <tr><td class="td-cmd">25</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">SMTP — Sending email</td></tr>
+              <tr><td class="td-cmd">53</td><td><span class="td-mode mode-user">UDP/TCP</span></td><td class="td-desc"><strong>DNS</strong> — Name resolution</td></tr>
+              <tr><td class="td-cmd">67</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc"><strong>DHCP</strong> — Server (receives client broadcasts)</td></tr>
+              <tr><td class="td-cmd">68</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc">DHCP — Client</td></tr>
+              <tr><td class="td-cmd">69</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc">TFTP — Trivial File Transfer (IOS upgrades)</td></tr>
+              <tr><td class="td-cmd">80</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc"><strong>HTTP</strong> — Unencrypted web traffic</td></tr>
+              <tr><td class="td-cmd">110</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">POP3 — Receiving email (download)</td></tr>
+              <tr><td class="td-cmd">143</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">IMAP — Receiving email (server-side)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead><tr><th>Port</th><th>Protocol</th><th>Service</th></tr></thead>
+            <tbody>
+              <tr><td class="td-cmd">161</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc">SNMP — Network monitoring queries</td></tr>
+              <tr><td class="td-cmd">162</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc">SNMP Trap — Unsolicited device alerts</td></tr>
+              <tr><td class="td-cmd">443</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc"><strong>HTTPS</strong> — Encrypted web traffic (TLS)</td></tr>
+              <tr><td class="td-cmd">514</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc">Syslog — System log messages to a log server</td></tr>
+              <tr><td class="td-cmd">520</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc">RIP — Routing Information Protocol updates</td></tr>
+              <tr><td class="td-cmd">546</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc">DHCPv6 — Client</td></tr>
+              <tr><td class="td-cmd">547</td><td><span class="td-mode mode-user">UDP</span></td><td class="td-desc">DHCPv6 — Server</td></tr>
+              <tr><td class="td-cmd">587</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">SMTP Submission — Authenticated email sending</td></tr>
+              <tr><td class="td-cmd">993</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">IMAPS — IMAP over TLS</td></tr>
+              <tr><td class="td-cmd">995</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">POP3S — POP3 over TLS</td></tr>
+              <tr><td class="td-cmd">1723</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">PPTP — VPN tunnelling protocol</td></tr>
+              <tr><td class="td-cmd">3389</td><td><span class="td-mode mode-user">TCP</span></td><td class="td-desc">RDP — Windows Remote Desktop</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 4: SIMULATOR TIPS ──────────────── -->
+    <section id="tips">
+      <div class="sec-hdr">
+        <div class="sec-hdr-icon si-purple">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="sec-hdr-text">
+          <h2>Simulator Tips &amp; Shortcuts</h2>
+          <p>Time-saving tricks for Cisco Packet Tracer and GNS3 that every student should know.</p>
+        </div>
+      </div>
+      <div class="tip-grid">
+        <div class="tip-item">
+          <div class="tip-icon si-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+          <div class="tip-text"><strong>IOS command shortcut</strong><span>You can abbreviate any command as long as it's unambiguous — <code>en</code> for <code>enable</code>, <code>conf t</code> for <code>configure terminal</code>, <code>sh ip int br</code> for <code>show ip interface brief</code></span></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon si-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="tip-text"><strong>? for context help</strong><span>Type <kbd>?</kbd> at any point in IOS for a list of valid commands or options — e.g. <code>show ?</code> lists all show commands, <code>show ip ?</code> narrows it further</span></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon si-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+          <div class="tip-text"><strong>Tab completion</strong><span>Press <kbd>Tab</kbd> to auto-complete a command or keyword. Works with partial input — saves typing and reduces errors</span></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon si-orange"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.93"/></svg></div>
+          <div class="tip-text"><strong>Command history</strong><span>Use <kbd>↑</kbd> / <kbd>↓</kbd> arrow keys to cycle through recent commands in IOS — same as a shell. Saves retyping long commands</span></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon si-orange"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+          <div class="tip-text"><strong>no command</strong><span>Prepend <code>no</code> to any IOS command to undo it — <code>no shutdown</code> enables an interface, <code>no ip address</code> removes the IP, <code>no router ospf 1</code> removes OSPF</span></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon si-orange"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          <div class="tip-text"><strong>Packet Tracer: PDU capture</strong><span>In Simulation mode, use <strong>Add Simple PDU</strong> (the envelope icon) to send a test packet and watch it traverse each device hop-by-hop with layer details</span></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon si-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="tip-text"><strong>Save early, save often</strong><span>Both Packet Tracer and GNS3 projects are separate from the device configs. Save the project file <em>and</em> run <code>copy run start</code> on each device — they are two different saves</span></div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon si-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+          <div class="tip-text"><strong>GNS3: Wireshark capture</strong><span>Right-click any link in GNS3 → <strong>Start capture</strong> — Wireshark opens automatically and shows live packet captures on that link. Invaluable for understanding protocols</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SECTION 5: DOWNLOADS ─────────────────────── -->
+    <section id="downloads">
+      <div class="sec-hdr">
+        <div class="sec-hdr-icon si-orange">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="sec-hdr-text">
+          <h2>Tool Downloads</h2>
+          <p>Everything you need to run the labs. Install the right tool for the lab difficulty level.</p>
+        </div>
+      </div>
+      <div class="dl-grid">
+
+        <!-- Packet Tracer -->
+        <div class="dl-card">
+          <div class="dl-icon" style="background:rgba(79,142,247,.1);color:var(--blue)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="dl-card-title">Cisco Packet Tracer</div>
+          <div class="dl-card-desc">The official Cisco network simulator — perfect for beginner labs (Labs 01–03). Drag-and-drop topology, built-in PC config panels, and simulation mode showing packet flows step-by-step.</div>
+          <div class="dl-card-meta">
+            <span class="dl-badge dl-free">Free</span>
+            <span style="font-size:12px;color:var(--text2)">Requires free Cisco NetAcad account</span>
+          </div>
+          <div class="dl-card-platforms">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Windows · macOS · Linux
+          </div>
+          <a class="dl-link" href="https://www.netacad.com/resources/lab-downloads" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+        </div>
+
+        <!-- GNS3 -->
+        <div class="dl-card">
+          <div class="dl-icon" style="background:rgba(52,211,153,.1);color:var(--green)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M9 6h6M6 9l6 9M18 9l-6 9"/></svg>
+          </div>
+          <div class="dl-card-title">GNS3</div>
+          <div class="dl-card-desc">Professional-grade network emulator used in intermediate and advanced labs (Labs 04–09). Runs real Cisco IOS images and supports complex multi-vendor topologies. Includes Wireshark integration.</div>
+          <div class="dl-card-meta">
+            <span class="dl-badge dl-free">Free</span>
+            <span style="font-size:12px;color:var(--text2)">Requires Cisco IOS images (see lab guides)</span>
+          </div>
+          <div class="dl-card-platforms">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Windows · macOS · Linux
+          </div>
+          <a class="dl-link" href="https://www.gns3.com/software/download" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+        </div>
+
+        <!-- VirtualBox -->
+        <div class="dl-card">
+          <div class="dl-icon" style="background:rgba(245,166,35,.1);color:var(--yellow)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="dl-card-title">VirtualBox</div>
+          <div class="dl-card-desc">Free virtualisation platform used for advanced labs (Labs 10–15) running full Linux VMs. Required for scenarios involving real operating systems, firewall appliances, and server configuration.</div>
+          <div class="dl-card-meta">
+            <span class="dl-badge dl-free">Free</span>
+            <span style="font-size:12px;color:var(--text2)">By Oracle — open source</span>
+          </div>
+          <div class="dl-card-platforms">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Windows · macOS · Linux
+          </div>
+          <a class="dl-link" href="https://www.virtualbox.org/wiki/Downloads" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+        </div>
+
+        <!-- Wireshark -->
+        <div class="dl-card">
+          <div class="dl-icon" style="background:rgba(167,139,250,.1);color:var(--purple)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="dl-card-title">Wireshark</div>
+          <div class="dl-card-desc">The world-standard packet analyser. Captures and decodes live traffic at every layer — indispensable for understanding protocols and troubleshooting. Integrates directly with GNS3 for lab captures.</div>
+          <div class="dl-card-meta">
+            <span class="dl-badge dl-free">Free</span>
+            <span style="font-size:12px;color:var(--text2)">Open source — GPLv2</span>
+          </div>
+          <div class="dl-card-platforms">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Windows · macOS · Linux
+          </div>
+          <a class="dl-link" href="https://www.wireshark.org/download.html" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div><!-- /page -->
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="8" height="8" rx="2"/><rect x="14" y="2" width="8" height="8" rx="2"/><rect x="2" y="14" width="8" height="8" rx="2"/><rect x="14" y="14" width="8" height="8" rx="2"/></svg>
+      Packet<span class="logo-dot">Path</span>
+    </div>
+    <div class="footer-links">
+      <a href="labs.html">Labs</a>
+      <a href="concepts.html">Concepts</a>
+      <a href="resources.html">Resources</a>
+    </div>
+    <span class="footer-copy">PacketPath — Networking Education</span>
+  </div>
+</footer>
+
+<script>
+// ─── THEME ──────────────────────────────────────────
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('pp_theme',t);
+  const icon=document.getElementById('themeIcon');
+  if(t==='light'){
+    icon.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  } else {
+    icon.innerHTML='<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+  }
+}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')}
+(function(){applyTheme(localStorage.getItem('pp_theme')||'dark')})();
+
+// ─── MOBILE MENU ─────────────────────────────────────
+function toggleMob(){
+  document.getElementById('hamburger').classList.toggle('open');
+  document.getElementById('mobMenu').classList.toggle('open');
+}
+
+// ─── COMMAND TABS ─────────────────────────────────────
+function showTab(id,btn){
+  document.querySelectorAll('.cmd-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.cmd-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
