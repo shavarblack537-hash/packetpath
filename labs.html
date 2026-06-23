@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PacketPath — Lab Library</title>
+<style>
+/* ─── TOKENS ──────────────────────────────────────── */
+:root {
+  --bg:      #080810;
+  --surface: #0e0e1c;
+  --card:    #111120;
+  --border:  #1e1e34;
+  --text:    #f2f2fc;
+  --text2:   #6a6a94;
+  --muted:   #2a2a44;
+  --accent:  #ff6b00;
+  --blue:    #4f8ef7;
+  --green:   #34d399;
+  --r:       10px;
+  --nav-h:   58px;
+  --font:    -apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+  --ease:    cubic-bezier(.22,.68,0,1.2);
+}
+[data-theme="light"] {
+  --bg:      #f4f4f0;
+  --surface: #ffffff;
+  --card:    #ffffff;
+  --border:  #e0e0ec;
+  --text:    #0a0a14;
+  --text2:   #56567a;
+  --muted:   #c2c2d6;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+svg{display:block}
+
+/* ─── NAV ─────────────────────────────────────────── */
+nav {
+  position: fixed; inset: 0 0 auto 0; height: var(--nav-h); z-index: 200;
+  display: flex; align-items: center; padding: 0 28px;
+  background: rgba(8,8,16,.92);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+[data-theme="light"] nav {
+  background: rgba(244,244,240,.94);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 700; letter-spacing: -.3px; flex-shrink: 0; }
+.nav-logo svg { width: 22px; height: 22px; }
+.logo-dot { color: var(--accent); }
+.nav-links { display: flex; align-items: center; gap: 2px; margin: 0 auto; }
+.nav-links a { padding: 6px 13px; border-radius: 7px; font-size: 13.5px; font-weight: 500; color: var(--text2); transition: color .2s, background .2s; }
+.nav-links a:hover,.nav-links a.active { color: var(--text); background: rgba(255,255,255,.06); }
+.nav-links a.active { color: var(--accent); }
+[data-theme="light"] .nav-links a:hover,[data-theme="light"] .nav-links a.active { background: rgba(0,0,0,.05); }
+.nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.btn-icon { width: 34px; height: 34px; border-radius: 7px; display: flex; align-items: center; justify-content: center; color: var(--text2); transition: color .2s, background .2s; }
+.btn-icon:hover { color: var(--text); background: rgba(255,255,255,.07); }
+[data-theme="light"] .btn-icon:hover { background: rgba(0,0,0,.06); }
+.btn-home { padding: 7px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 500; border: 1px solid var(--border); color: var(--text2); transition: color .2s, border-color .2s; }
+.btn-home:hover { color: var(--text); border-color: var(--muted); }
+.hamburger { display: none; width: 34px; height: 34px; flex-direction: column; justify-content: center; align-items: center; gap: 5px; border-radius: 7px; transition: background .2s; }
+.hamburger:hover { background: rgba(255,255,255,.07); }
+.hamburger span { display: block; width: 17px; height: 1.5px; background: var(--text2); border-radius: 2px; transition: transform .28s var(--ease), opacity .2s; }
+.hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+.mobile-menu { position: fixed; inset: var(--nav-h) 0 0 0; background: var(--bg); z-index: 190; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: opacity .22s, transform .22s; }
+.mobile-menu.open { opacity: 1; pointer-events: all; transform: none; }
+.mobile-menu a { padding: 13px 14px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text2); }
+.mobile-menu a:hover { color: var(--text); background: rgba(255,255,255,.06); }
+
+/* ─── PAGE LAYOUT ─────────────────────────────────── */
+.page { padding-top: var(--nav-h); min-height: 100vh; }
+
+/* ─── HERO ────────────────────────────────────────── */
+.hero {
+  padding: 64px 28px 48px;
+  max-width: 1080px;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--border);
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 99px;
+  background: rgba(255,107,0,.09); border: 1px solid rgba(255,107,0,.22);
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 20px;
+}
+.hero h1 { font-size: clamp(32px,4vw,52px); font-weight: 800; letter-spacing: -1.5px; color: var(--text); margin-bottom: 12px; line-height: 1.1; }
+.hero p { font-size: 16px; color: var(--text2); max-width: 520px; line-height: 1.65; margin-bottom: 32px; }
+
+/* ─── FILTER BAR ──────────────────────────────────── */
+.filter-bar {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+}
+.filter-group {
+  display: flex; align-items: center; gap: 6px;
+}
+.filter-group label { font-size: 12px; font-weight: 600; color: var(--text2); letter-spacing: .05em; text-transform: uppercase; margin-right: 4px; white-space: nowrap; }
+.fpill {
+  padding: 5px 14px; border-radius: 7px;
+  font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border); color: var(--text2);
+  background: transparent;
+  transition: all .18s;
+  cursor: pointer;
+}
+.fpill:hover { color: var(--text); border-color: var(--muted); }
+.fpill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.fpill.active.blue  { background: var(--blue); border-color: var(--blue); }
+.fpill.active.green { background: var(--green); border-color: var(--green); color: #0a0a14; }
+.fpill.active.org   { background: var(--accent); border-color: var(--accent); }
+.search-wrap {
+  margin-left: auto;
+  position: relative;
+}
+.search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text2); pointer-events: none; }
+.search-inp {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 14px 8px 34px;
+  font-size: 14px; color: var(--text); font-family: var(--font);
+  width: 220px; outline: none;
+  transition: border-color .2s;
+}
+.search-inp::placeholder { color: var(--text2); }
+.search-inp:focus { border-color: var(--accent); }
+
+/* ─── MAIN CONTENT ────────────────────────────────── */
+.content {
+  max-width: 1080px; margin: 0 auto;
+  padding: 40px 28px 80px;
+}
+
+/* Track section headers */
+.track-section { margin-bottom: 56px; }
+.track-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px; padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.track-icon-sm { font-size: 22px; }
+.track-header-info {}
+.track-h-name { font-size: 20px; font-weight: 800; letter-spacing: -.4px; color: var(--text); margin-bottom: 3px; }
+.track-h-sub  { font-size: 13px; color: var(--text2); }
+.track-count  { margin-left: auto; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,.05); border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text2); }
+[data-theme="light"] .track-count { background: rgba(0,0,0,.04); }
+
+/* Lab grid */
+.labs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Lab card */
+.lab {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px 20px;
+  display: flex; flex-direction: column;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .2s;
+  text-decoration: none;
+}
+.lab:hover { background: var(--surface); border-color: var(--muted); transform: translateY(-2px); }
+.lab.hidden { display: none; }
+
+.lab-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.diff {
+  padding: 3px 8px; border-radius: 5px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+}
+.diff.beg { background: rgba(52,211,153,.12); color: #34d399; border: 1px solid rgba(52,211,153,.25); }
+.diff.int { background: rgba(255,180,0,.12);  color: #f5a623; border: 1px solid rgba(255,180,0,.28); }
+.diff.adv { background: rgba(239,68,68,.12);  color: #f87171; border: 1px solid rgba(239,68,68,.28); }
+.lab-num  { font-size: 11px; font-weight: 600; color: var(--text2); }
+
+.lab-title { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -.2px; margin-bottom: 8px; line-height: 1.3; }
+.lab-scenario {
+  font-size: 12.5px; color: var(--text2); line-height: 1.55;
+  margin-bottom: 16px; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.lab-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+.lab-tag {
+  padding: 3px 8px; border-radius: 5px;
+  font-size: 11px; font-weight: 500; color: var(--text2);
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+}
+[data-theme="light"] .lab-tag { background: rgba(0,0,0,.04); border-color: var(--border); }
+
+.lab-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); margin-top: auto; }
+.lab-meta { display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--text2); }
+.lab-meta span { display: flex; align-items: center; gap: 4px; }
+.lab-cta-link {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12.5px; font-weight: 600; color: var(--accent);
+  transition: gap .15s;
+}
+.lab:hover .lab-cta-link { gap: 8px; }
+
+/* Empty state */
+.empty-state {
+  grid-column: 1/-1;
+  text-align: center; padding: 60px 20px;
+  color: var(--text2); font-size: 15px;
+}
+
+/* ─── Footer ─────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  max-width: 1080px; margin: 0 auto;
+}
+.flogo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; }
+.flinks { display: flex; gap: 20px; font-size: 13px; color: var(--text2); }
+.flinks a:hover { color: var(--text); }
+.fcopy { font-size: 13px; color: var(--muted); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+@media(max-width:900px) { .labs-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:640px) {
+  .labs-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .filter-bar { gap: 12px; }
+  .search-wrap { margin-left: 0; width: 100%; }
+  .search-inp { width: 100%; }
+  .hero { padding: 48px 20px 36px; }
+  .content { padding: 28px 20px 60px; }
+  footer { flex-direction: column; align-items: flex-start; }
+}
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="packetpath.html" class="nav-logo" aria-label="PacketPath home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+      <path d="M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M5.2 18.8l2.1-2.1M16.7 7.3l2.1-2.1"/>
+    </svg>
+    Packet<span class="logo-dot">Path</span>
+  </a>
+  <ul class="nav-links" role="list">
+    <li><a href="packetpath.html">Home</a></li>
+    <li><a href="labs.html" class="active">Labs</a></li>
+    <li><a href="concepts.html">Concepts</a></li>
+    <li><a href="resources.html">Resources</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn-icon" id="themeBtn" aria-label="Toggle theme">
+      <svg id="iMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg id="iSun"  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+    <a href="packetpath.html" class="btn-home">← Home</a>
+    <button class="hamburger" id="hbg" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mob">
+  <a href="packetpath.html">Home</a>
+  <a href="labs.html">Labs</a>
+  <a href="concepts.html">Concepts</a>
+  <a href="resources.html">Resources</a>
+</div>
+
+<div class="page">
+
+  <!-- Hero + Filters -->
+  <div class="hero">
+    <div class="hero-tag">Lab Library</div>
+    <h1>15 Labs. Real Problems.<br>Your Environment.</h1>
+    <p>Every lab is a real-world scenario — the kind of problem you'll actually face in a networking or sysadmin role. Set up your VM and start working through them.</p>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Track</label>
+        <button class="fpill active" data-filter="track" data-val="all">All</button>
+        <button class="fpill" data-filter="track" data-val="networking">Networking</button>
+        <button class="fpill" data-filter="track" data-val="ad">Active Directory</button>
+      </div>
+      <div class="filter-group">
+        <label>Level</label>
+        <button class="fpill active" data-filter="diff" data-val="all">All</button>
+        <button class="fpill" data-filter="diff" data-val="beginner">Beginner</button>
+        <button class="fpill" data-filter="diff" data-val="intermediate">Intermediate</button>
+        <button class="fpill" data-filter="diff" data-val="advanced">Advanced</button>
+      </div>
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input class="search-inp" id="searchInp" type="search" placeholder="Search labs…" aria-label="Search labs">
+      </div>
+    </div>
+  </div>
+
+  <!-- Lab Content -->
+  <div class="content" id="content">
+
+    <!-- Networking Section -->
+    <div class="track-section" id="net-section" data-track="networking">
+      <div class="track-header">
+        <span class="track-icon-sm">🔌</span>
+        <div class="track-header-info">
+          <div class="track-h-name">Networking Track</div>
+          <div class="track-h-sub">GNS3 or Packet Tracer • Beginner to Advanced</div>
+        </div>
+        <span class="track-count" id="netCount">9 labs</span>
+      </div>
+      <div class="labs-grid" id="net-grid">
+
+        <!-- Lab 1 -->
+        <a class="lab" href="lab.html?id=1" data-track="networking" data-diff="beginner" data-tags="ip subnetting cidr vlsm addressing">
+          <div class="lab-header">
+            <span class="diff beg">Beginner</span>
+            <span class="lab-num">Lab 01</span>
+          </div>
+          <div class="lab-title">IP Subnetting & CIDR Fundamentals</div>
+          <div class="lab-scenario">A growing company needs to divide a single /24 block into 6 department subnets with different host requirements. You'll plan, calculate, and configure the address scheme from scratch — then verify with pings.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">IP Addressing</span>
+            <span class="lab-tag">CIDR</span>
+            <span class="lab-tag">VLSM</span>
+            <span class="lab-tag">Subnetting</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                60–90 min
+              </span>
+              <span>Packet Tracer</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 2 -->
+        <a class="lab" href="lab.html?id=2" data-track="networking" data-diff="beginner" data-tags="vlan trunking 802.1q switch segmentation">
+          <div class="lab-header">
+            <span class="diff beg">Beginner</span>
+            <span class="lab-num">Lab 02</span>
+          </div>
+          <div class="lab-title">VLAN Segmentation & Trunking</div>
+          <div class="lab-scenario">Guest Wi-Fi traffic is bleeding into the corporate LAN — clients can see file servers they have no business accessing. You'll reconfigure VLANs, fix trunk port settings, and verify isolation with packet captures.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">VLANs</span>
+            <span class="lab-tag">802.1Q</span>
+            <span class="lab-tag">Trunking</span>
+            <span class="lab-tag">Switching</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 90–120 min</span>
+              <span>GNS3 / PT</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 3 -->
+        <a class="lab" href="lab.html?id=3" data-track="networking" data-diff="beginner" data-tags="spanning tree stp rstp loop root bridge port states">
+          <div class="lab-header">
+            <span class="diff beg">Beginner</span>
+            <span class="lab-num">Lab 03</span>
+          </div>
+          <div class="lab-title">Spanning Tree & Loop Prevention</div>
+          <div class="lab-scenario">A broadcast storm has made the network completely unusable — a loop was introduced when a new switch was added without STP configured. You'll diagnose the loop, configure STP correctly, and verify convergence.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">STP</span>
+            <span class="lab-tag">RSTP</span>
+            <span class="lab-tag">Root Bridge</span>
+            <span class="lab-tag">Port States</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 60–90 min</span>
+              <span>GNS3 / PT</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 4 -->
+        <a class="lab" href="lab.html?id=4" data-track="networking" data-diff="intermediate" data-tags="ospf routing link-state dr bdr area lsa">
+          <div class="lab-header">
+            <span class="diff int">Intermediate</span>
+            <span class="lab-num">Lab 04</span>
+          </div>
+          <div class="lab-title">OSPF Single-Area Routing</div>
+          <div class="lab-scenario">A company with 3 office sites needs dynamic routing — static routes aren't cutting it anymore. Configure OSPF across a multi-router topology, verify neighbor adjacency, DR/BDR election, and route propagation.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">OSPF</span>
+            <span class="lab-tag">Link-State</span>
+            <span class="lab-tag">DR/BDR</span>
+            <span class="lab-tag">LSAs</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 90–120 min</span>
+              <span>GNS3</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 5 -->
+        <a class="lab" href="lab.html?id=5" data-track="networking" data-diff="intermediate" data-tags="inter-vlan routing layer 3 switching svi router-on-a-stick">
+          <div class="lab-header">
+            <span class="diff int">Intermediate</span>
+            <span class="lab-num">Lab 05</span>
+          </div>
+          <div class="lab-title">Inter-VLAN Routing & L3 Switching</div>
+          <div class="lab-scenario">Engineering and Marketing are on separate VLANs and can't communicate — by design. Now leadership wants selective inter-VLAN access. Configure both router-on-a-stick and SVI approaches, then apply routing policies.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">Inter-VLAN</span>
+            <span class="lab-tag">L3 Switching</span>
+            <span class="lab-tag">SVIs</span>
+            <span class="lab-tag">Routing</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 90–120 min</span>
+              <span>GNS3 / PT</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 6 -->
+        <a class="lab" href="lab.html?id=6" data-track="networking" data-diff="intermediate" data-tags="acl access control list standard extended named security filtering">
+          <div class="lab-header">
+            <span class="diff int">Intermediate</span>
+            <span class="lab-num">Lab 06</span>
+          </div>
+          <div class="lab-title">Access Control Lists</div>
+          <div class="lab-scenario">The server subnet is wide open — any internal user can reach it. Configure standard and extended ACLs to restrict server access to authorized subnets only, while keeping HTTP/HTTPS traffic flowing to the internet.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">ACL</span>
+            <span class="lab-tag">Standard</span>
+            <span class="lab-tag">Extended</span>
+            <span class="lab-tag">Traffic Filtering</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 60–90 min</span>
+              <span>GNS3 / PT</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 7 -->
+        <a class="lab" href="lab.html?id=7" data-track="networking" data-diff="advanced" data-tags="nat pat overload translation address internet">
+          <div class="lab-header">
+            <span class="diff adv">Advanced</span>
+            <span class="lab-num">Lab 07</span>
+          </div>
+          <div class="lab-title">NAT & PAT Configuration</div>
+          <div class="lab-scenario">A branch office needs internet access through a single public IP. Configure static NAT for an internal server (public access), PAT for outbound internet traffic, and troubleshoot why two devices can't reach the same external host simultaneously.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">NAT</span>
+            <span class="lab-tag">PAT</span>
+            <span class="lab-tag">Overload</span>
+            <span class="lab-tag">Translation</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 90–120 min</span>
+              <span>GNS3</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 8 -->
+        <a class="lab" href="lab.html?id=8" data-track="networking" data-diff="advanced" data-tags="bgp peering ebgp as autonomous system prefix-list route advertisement">
+          <div class="lab-header">
+            <span class="diff adv">Advanced</span>
+            <span class="lab-num">Lab 08</span>
+          </div>
+          <div class="lab-title">BGP Peering & Route Advertisement</div>
+          <div class="lab-scenario">A BGP session between two routers keeps dropping — the peer is up one minute, gone the next. You'll diagnose the flapping session, fix the root cause, configure prefix-lists to control what gets advertised, and verify end-to-end reachability.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">BGP</span>
+            <span class="lab-tag">eBGP</span>
+            <span class="lab-tag">AS Paths</span>
+            <span class="lab-tag">Prefix-lists</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 2–2.5 hours</span>
+              <span>GNS3</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 9 -->
+        <a class="lab" href="lab.html?id=9" data-track="networking" data-diff="advanced" data-tags="troubleshooting diagnosis faults ospf vlan acl nat wireshark debug">
+          <div class="lab-header">
+            <span class="diff adv">Advanced</span>
+            <span class="lab-num">Lab 09</span>
+          </div>
+          <div class="lab-title">Network Troubleshooting Capstone</div>
+          <div class="lab-scenario">A production GNS3 topology with 5 deliberately planted faults spanning STP, OSPF, ACLs, NAT, and VLAN config. No hints. No fault list. Restore full connectivity and document your findings like you'd hand them to a manager.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">Troubleshooting</span>
+            <span class="lab-tag">Diagnosis</span>
+            <span class="lab-tag">Multi-protocol</span>
+            <span class="lab-tag">Capstone</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 2–3 hours</span>
+              <span>GNS3</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+      </div><!-- /net-grid -->
+    </div><!-- /net-section -->
+
+    <!-- Active Directory Section -->
+    <div class="track-section" id="ad-section" data-track="ad">
+      <div class="track-header">
+        <span class="track-icon-sm">🖥</span>
+        <div class="track-header-info">
+          <div class="track-h-name">Active Directory Track</div>
+          <div class="track-h-sub">VirtualBox + Windows Server 2022 • Beginner to Advanced</div>
+        </div>
+        <span class="track-count" id="adCount">6 labs</span>
+      </div>
+      <div class="labs-grid" id="ad-grid">
+
+        <!-- Lab 10 -->
+        <a class="lab" href="lab.html?id=10" data-track="ad" data-diff="beginner" data-tags="domain controller ad ds active directory forest dns windows server setup">
+          <div class="lab-header">
+            <span class="diff beg">Beginner</span>
+            <span class="lab-num">Lab 10</span>
+          </div>
+          <div class="lab-title">Domain Controller Deployment</div>
+          <div class="lab-scenario">A small business has been running workgroup mode and is ready for centralized identity. Install Windows Server 2022, promote it to a domain controller, configure the AD DS role, and join your first client workstation to the domain.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">AD DS</span>
+            <span class="lab-tag">Domain</span>
+            <span class="lab-tag">Forest</span>
+            <span class="lab-tag">Windows Server</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 90–120 min</span>
+              <span>VirtualBox</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 11 -->
+        <a class="lab" href="lab.html?id=11" data-track="ad" data-diff="beginner" data-tags="dns dhcp zones scopes windows server name resolution ip assignment">
+          <div class="lab-header">
+            <span class="diff beg">Beginner</span>
+            <span class="lab-num">Lab 11</span>
+          </div>
+          <div class="lab-title">DNS & DHCP Configuration</div>
+          <div class="lab-scenario">50 workstations need automatic IP addresses and working name resolution. Configure DHCP scopes with reservations for servers, set up DNS forward and reverse lookup zones, and troubleshoot a client that can't resolve domain names.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">DNS</span>
+            <span class="lab-tag">DHCP</span>
+            <span class="lab-tag">Zones</span>
+            <span class="lab-tag">Scopes</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 60–90 min</span>
+              <span>VirtualBox</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 12 -->
+        <a class="lab" href="lab.html?id=12" data-track="ad" data-diff="intermediate" data-tags="group policy gpo gpmc filtering precedence enforcement desktop management">
+          <div class="lab-header">
+            <span class="diff int">Intermediate</span>
+            <span class="lab-num">Lab 12</span>
+          </div>
+          <div class="lab-title">Group Policy Management</div>
+          <div class="lab-scenario">Lock down 50 workstations across 4 departments without disrupting anyone's workflow: enforce password complexity, disable USB storage on standard users, map department-specific drives, and configure a restricted desktop for the kiosk OU.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">GPO</span>
+            <span class="lab-tag">GPMC</span>
+            <span class="lab-tag">Filtering</span>
+            <span class="lab-tag">Precedence</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 90–120 min</span>
+              <span>VirtualBox</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 13 -->
+        <a class="lab" href="lab.html?id=13" data-track="ad" data-diff="intermediate" data-tags="users groups ou organizational unit delegation permissions onboarding">
+          <div class="lab-header">
+            <span class="diff int">Intermediate</span>
+            <span class="lab-num">Lab 13</span>
+          </div>
+          <div class="lab-title">Users, Groups & OU Structure</div>
+          <div class="lab-scenario">Onboard 30 new hires across 4 departments with the right permissions from day one. Design an OU structure, create security and distribution groups, set up role-based access to file shares, and delegate helpdesk-level admin rights.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">Users</span>
+            <span class="lab-tag">Groups</span>
+            <span class="lab-tag">OUs</span>
+            <span class="lab-tag">Delegation</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 60–90 min</span>
+              <span>VirtualBox</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 14 -->
+        <a class="lab" href="lab.html?id=14" data-track="ad" data-diff="advanced" data-tags="ad security hardening kerberoasting pass-the-hash adminsdholder tiering privileged access">
+          <div class="lab-header">
+            <span class="diff adv">Advanced</span>
+            <span class="lab-num">Lab 14</span>
+          </div>
+          <div class="lab-title">Active Directory Security Hardening</div>
+          <div class="lab-scenario">You've inherited a domain that's a mess — accounts with never-expire passwords, DA group bloat, no tiering model. Audit the environment, identify the attack surface, and implement hardening against Kerberoasting, Pass-the-Hash, and lateral movement.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">Kerberoasting</span>
+            <span class="lab-tag">Pass-the-Hash</span>
+            <span class="lab-tag">AdminSDHolder</span>
+            <span class="lab-tag">Tiering</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 2–2.5 hours</span>
+              <span>VirtualBox</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+        <!-- Lab 15 -->
+        <a class="lab" href="lab.html?id=15" data-track="ad" data-diff="advanced" data-tags="enterprise capstone multi-site rodc replication dhcp failover sites services gpo">
+          <div class="lab-header">
+            <span class="diff adv">Advanced</span>
+            <span class="lab-num">Lab 15</span>
+          </div>
+          <div class="lab-title">Enterprise AD Capstone</div>
+          <div class="lab-scenario">Build a full two-site enterprise from scratch: primary DC at HQ, a Read-Only Domain Controller at the branch, DHCP failover between sites, site-aware Group Policy, AD replication monitoring, and a full security audit at the end. No hand-holding.</div>
+          <div class="lab-tags">
+            <span class="lab-tag">Multi-site</span>
+            <span class="lab-tag">RODC</span>
+            <span class="lab-tag">Replication</span>
+            <span class="lab-tag">Capstone</span>
+          </div>
+          <div class="lab-footer">
+            <div class="lab-meta">
+              <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 3+ hours</span>
+              <span>VirtualBox</span>
+            </div>
+            <span class="lab-cta-link">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          </div>
+        </a>
+
+      </div><!-- /ad-grid -->
+    </div><!-- /ad-section -->
+
+  </div><!-- /content -->
+
+</div><!-- /page -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="flogo">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+    </svg>
+    Packet<span style="color:var(--accent)">Path</span>
+  </div>
+  <div class="flinks">
+    <a href="packetpath.html">Home</a>
+    <a href="packetpath.html#how">How It Works</a>
+    <a href="packetpath.html#why">Why PacketPath</a>
+  </div>
+  <div class="fcopy">© 2026 PacketPath. Built for network professionals.</div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* ── Theme ─────────────────────────────────────────── */
+const HTML=document.documentElement;
+const themeBtn=document.getElementById('themeBtn');
+const iMoon=document.getElementById('iMoon'), iSun=document.getElementById('iSun');
+function applyTheme(t){
+  HTML.setAttribute('data-theme',t); localStorage.setItem('pp_theme',t);
+  iMoon.style.display=t==='dark'?'block':'none';
+  iSun.style.display =t==='light'?'block':'none';
+}
+themeBtn.addEventListener('click',()=>applyTheme(HTML.getAttribute('data-theme')==='dark'?'light':'dark'));
+const saved=localStorage.getItem('pp_theme');
+if(saved)applyTheme(saved);
+else if(window.matchMedia('(prefers-color-scheme:light)').matches)applyTheme('light');
+
+/* ── Mobile menu ───────────────────────────────────── */
+const hbg=document.getElementById('hbg'), mob=document.getElementById('mob');
+if(hbg){
+  hbg.addEventListener('click',()=>{
+    const open=hbg.classList.toggle('open');
+    mob.classList.toggle('open',open);
+    hbg.setAttribute('aria-expanded',String(open));
+    document.body.style.overflow=open?'hidden':'';
+  });
+  mob.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+    hbg.classList.remove('open'); mob.classList.remove('open');
+    hbg.setAttribute('aria-expanded','false'); document.body.style.overflow='';
+  }));
+}
+
+/* ── Filter + Search system ────────────────────────── */
+const labs     = Array.from(document.querySelectorAll('.lab'));
+const netGrid  = document.getElementById('net-grid');
+const adGrid   = document.getElementById('ad-grid');
+const netSec   = document.getElementById('net-section');
+const adSec    = document.getElementById('ad-section');
+const netCount = document.getElementById('netCount');
+const adCount  = document.getElementById('adCount');
+const searchInp= document.getElementById('searchInp');
+
+let activeTrack = 'all';
+let activeDiff  = 'all';
+let searchQ     = '';
+
+// Handle URL param for deep linking (e.g. labs.html?track=networking)
+const urlParams = new URLSearchParams(window.location.search);
+const trackParam = urlParams.get('track');
+if(trackParam === 'networking') activeTrack = 'networking';
+if(trackParam === 'ad')         activeTrack = 'ad';
+
+function updateFilters() {
+  let netVisible = 0, adVisible = 0;
+
+  labs.forEach(lab => {
+    const t    = lab.dataset.track;
+    const d    = lab.dataset.diff;
+    const tags = lab.dataset.tags || '';
+    const title= lab.querySelector('.lab-title')?.textContent.toLowerCase() || '';
+    const scen = lab.querySelector('.lab-scenario')?.textContent.toLowerCase() || '';
+
+    const trackOk = activeTrack === 'all' || t === activeTrack;
+    const diffOk  = activeDiff  === 'all' || d === activeDiff;
+    const q       = searchQ.toLowerCase().trim();
+    const searchOk= !q || title.includes(q) || tags.includes(q) || scen.includes(q);
+
+    const show = trackOk && diffOk && searchOk;
+    lab.classList.toggle('hidden', !show);
+    if(show) { if(t==='networking') netVisible++; else adVisible++; }
+  });
+
+  // Section visibility
+  const showNet = activeTrack !== 'ad'  && netVisible > 0;
+  const showAd  = activeTrack !== 'networking' && adVisible > 0;
+  netSec.style.display = showNet ? '' : 'none';
+  adSec.style.display  = showAd  ? '' : 'none';
+
+  // Update counts
+  netCount.textContent = netVisible + (netVisible===1?' lab':' labs');
+  adCount.textContent  = adVisible  + (adVisible===1?' lab':' labs');
+
+  // Empty state
+  ['net-grid','ad-grid'].forEach(gid => {
+    const grid = document.getElementById(gid);
+    if(!grid) return;
+    const existing = grid.querySelector('.empty-state');
+    if(existing) existing.remove();
+    const visCount = Array.from(grid.querySelectorAll('.lab:not(.hidden)')).length;
+    if(visCount === 0 && grid.closest('.track-section').style.display !== 'none') {
+      const el = document.createElement('div');
+      el.className = 'empty-state';
+      el.textContent = 'No labs match your filters.';
+      grid.appendChild(el);
+    }
+  });
+}
+
+// Filter pills
+document.querySelectorAll('.fpill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const filter = btn.dataset.filter;
+    const val    = btn.dataset.val;
+
+    // Update active pill in group
+    document.querySelectorAll(`.fpill[data-filter="${filter}"]`).forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+
+    if(filter === 'track') activeTrack = val;
+    if(filter === 'diff')  activeDiff  = val;
+    updateFilters();
+  });
+});
+
+// Search
+searchInp.addEventListener('input', e => {
+  searchQ = e.target.value;
+  updateFilters();
+});
+
+// Apply URL param on load
+if(activeTrack !== 'all') {
+  document.querySelectorAll('.fpill[data-filter="track"]').forEach(p=>p.classList.remove('active'));
+  const targetPill = document.querySelector(`.fpill[data-filter="track"][data-val="${activeTrack}"]`);
+  if(targetPill) targetPill.classList.add('active');
+}
+
+updateFilters();
+
+})();
+</script>
+</body>
+</html>
